@@ -100,33 +100,27 @@ If all runs across all cases passed, skip to Step 6.
 
 ### Step 4: Failure Analysis
 
-Collect all failure annotations across all cases and group by root cause:
+Use the Agent tool to spawn the **skill-refiner** agent with:
+- **Skill path:** the SKILL.md draft path
+- **Test result paths:** paths to all test result files from the current round
+- **User annotations:** the structured judgments from Step 3 (all cases, both pass and fail)
+- **Test history path:** the test history directory
 
-```
-## Failure Pattern Analysis
+The skill-refiner performs dual-lens analysis (cross-run consistency + per-run correctness), checks for regressions against prior refinement rounds, and returns a structured report with:
+1. Findings categorized as regressions, correctness issues, or consistency issues (ranked by severity)
+2. Proposed edits with before/after text and rationale for each fix
 
-### Pattern 1: [Pattern Name] ({count} failures across {case_count} cases)
-- {case-name}: run {n} ({user annotation})
-- {case-name}: run {n} ({user annotation})
-- Root cause: [your analysis of why these failures share a common cause]
-
-### Proposed Skill Edits
-1. [Specific edit tied to Pattern 1]
-2. [Specific edit tied to Pattern 2]
-```
-
-Present the analysis and proposed edits to the user. The user approves, modifies, or rejects each proposed edit.
+Present the skill-refiner's analysis and proposed edits to the user. The user approves all, approves specific fixes, or rejects with feedback.
 
 ### Step 5: Apply Refinements
 
-For each approved edit:
+Based on the user's response to the analysis:
 
-1. Read the target file (SKILL.md or reference file)
-2. Compute SHA256 hash and compare to last-known hash
-3. If hash differs from expected: show what changed, ask overwrite/incorporate/keep
-4. Apply the edit using the Edit tool
-5. Update the last-known hash
-6. Commit: `fix: address multirun failure pattern — {description}`
+- **Approve all:** Spawn **skill-refiner** with: skill path, the analysis report from Step 4, and instruction `"Apply all"`
+- **Approve some:** Spawn **skill-refiner** with: skill path, the analysis report, and instruction `"Apply fixes N, M, ..."`
+- **Reject with feedback:** Spawn **skill-refiner** with: all original inputs from Step 4 plus the user's additional feedback appended to annotations. Present the revised analysis and return to user approval.
+
+After skill-refiner applies edits and writes its refinement record, commit: `fix: address multirun failure pattern — {description}`
 
 ### Step 6: Re-run Recommendation
 
