@@ -25,14 +25,19 @@ The current 4-phase structure restructures into:
 ```
 Phase 1: Design (was: Intent)
   REQUIRED SUB-SKILL: superpowers:brainstorming
-  - Skill-bench injects skill-authoring context: what a skill is, frontmatter schema, size budgets
+  - Before invoking brainstorming, skill-bench states: "Save the design spec to .skillbench/specs/{skill-name}-design.md"
+    (brainstorming respects user preferences for spec location over its default docs/superpowers/specs/)
+  - Before invoking brainstorming, skill-bench loads references/skill-format.md and provides a summary
+    as context: what a Claude Code skill is, frontmatter schema, size budgets, description conventions
   - Spec saved to .skillbench/specs/{skill-name}-design.md
   - Exit gate: user-approved design spec
 
 Phase 2: Plan (new phase)
   REQUIRED SUB-SKILL: superpowers:writing-plans
-  - Skill-bench provides references/skill-authoring-plan-template.md as context
-  - Plan adapts writing-plans' task format from code-oriented to skill-authoring tasks
+  - Before invoking writing-plans, skill-bench states: "Save the plan to .skillbench/plans/{skill-name}-plan.md"
+    (writing-plans respects user preferences for plan location over its default docs/superpowers/plans/)
+  - Before invoking writing-plans, skill-bench loads references/skill-authoring-plan-template.md and
+    provides it as context so writing-plans produces skill-authoring tasks instead of code-oriented tasks
   - Plan saved to .skillbench/plans/{skill-name}-plan.md
   - Exit gate: user-approved plan
 
@@ -179,6 +184,6 @@ The `.gitignore` guidance updates: `.skillbench/test-history/` still gitignored 
 | `skills/skill-bench/references/anti-patterns.md` | Unchanged | Still loaded in Phase 4 finalize |
 | `agents/skill-tester.md` | Unchanged | Still spawned by Reviewer 2 for simulated testing |
 | `agents/skill-explorer.md` | Unchanged | Still works independently |
-| `.claude-plugin/plugin.json` | Minor edit | Bump version, possibly add informal dependencies note |
+| `.claude-plugin/plugin.json` | Minor edit | Bump version to 0.2.0. Add `"dependencies": ["claude-plugins-official/superpowers"]` (informational — plugin loader doesn't enforce this, but documents the requirement) |
 | `CLAUDE.md` | Update | Reflect new architecture and superpowers dependency |
 | `README.md` | Update | Reflect new workflow, add superpowers prerequisite |
