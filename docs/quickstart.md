@@ -1,101 +1,99 @@
-# Quick Start: Creating Skills from Reference Documents
+# Quick Start
 
-This guide is for domain experts who want to turn guidance documents, regulations, and procedures into reusable Claude Code skills.
+Two ways to create skills: **Express** (from reference documents) or **Full** (from scratch with design exploration).
 
-## What You Need
+## Install
 
-- Claude Code installed and working
-- This plugin installed: `claude plugins add https://github.com/Yiminnn/skill-bench-plugin`
-- URLs to your source documents (guidance PDFs, regulations, government notices)
-
-## Step 1: Create the Skill
-
-In Claude Code, type one message with:
-- What the skill should do
-- Your source documents as URLs, with a note explaining what each one is for
-
-Example:
-
-```
-/skill-bench-express create a new skill for [topic] assessment,
-here is the guidance document that you should follow step by step
-using the decision tree in the document as the main guide for workflow:
-[URL to primary guidance PDF]
-
-For the [specific sub-topic] step, follow the recommendations in
-this guidance and make this a separate reference:
-[URL to supporting guidance]
-
-The regulations that underlie this framework should serve as the
-ground truth and be a separate reference:
-[URL to regulations]
+```bash
+claude plugins add https://github.com/Yiminnn/skill-bench-plugin
 ```
 
-**Tips for describing your documents:**
-- Say "main guide" or "step by step" for the primary document the skill should follow
-- Say "ground truth" or "regulations" for the underlying rules
-- Say "separate reference" for supporting documents on specific topics
-- Say "background" or "rationale" for context documents
+## Path A: Express (Reference Documents → Skill)
 
-## Step 2: Review the Triage
+Best when you have source documents and know what the skill should do.
 
-Claude will read your documents and show a summary of what it found — decision tree branches, key criteria, regulatory sections. Check that:
+### 1. Create
 
-- All major steps from the guidance are listed
-- No important criteria were missed
-- The proposed skill name makes sense
+Type one message with what the skill should do and your source documents as URLs. Describe what each document is for — this controls how deeply each one is read.
 
-Type **y** if it looks right, or tell Claude what it missed.
+**Example — regulatory assessment:**
+```
+/skill-bench-express create a skill for [topic] assessment,
+here is the guidance document to follow step by step using the
+decision tree as the main guide for workflow: [URL]
 
-## Step 3: Review the Draft
+For the [sub-topic] step, make this a separate reference: [URL]
 
-Claude generates the skill files and asks you to review them in your editor. Open the files and check:
+The regulations should serve as the ground truth: [URL]
+```
 
-- **Decision tree** — Are all branches from the guidance captured?
-- **Regulatory citations** — Do they match the source documents?
-- **Terminology** — Are domain terms used correctly?
+**Example — report generation:**
+```
+/skill-bench-express create a skill that generates [report type],
+here is an example of a completed report to use as the template
+and main guide: [URL]
 
-Tell Claude what to change, or type **looks good** to continue.
+Use this style guide as background for formatting: [URL]
+```
 
-## Step 4: Test with a Sample Case
+**Example — process checklist:**
+```
+/skill-bench-express create a skill for [process name] review,
+follow this standard operating procedure step by step as the
+main guide: [URL]
 
-Claude offers to run the skill against a sample case. Say **yes** to see how it performs. Review the output for correctness.
+These requirements should be the ground truth: [URL]
+```
 
-## Step 5: Test with Real Cases (Recommended)
+**Role keywords** — how you describe a document determines extraction depth:
 
-For thorough validation, say **full validation** when prompted. Claude will ask you to describe your test cases. For each case, provide:
+| You say... | How it's read |
+|---|---|
+| "main guide", "step by step", "decision tree" | Full — every branch, criterion, step |
+| "ground truth", "regulations", "requirements" | Citation-driven — only sections cited by the main guide |
+| "separate reference", "for [topic]" | Targeted — only the named topic |
+| "background", "rationale", "context" | Structural — key concepts and definitions only |
 
-- A name (e.g., "standard-bone-graft")
-- The input prompt (what a user would ask the skill)
-- Any reference files the skill would need
+### 2. Review triage
 
-Claude runs each case 5 times and shows you:
-- What was **consistent** across all runs
-- What **varied** between runs
+Claude shows what it extracted from each document. Check that nothing important was missed. Type **y** or tell Claude what's wrong.
 
-For each run, mark it **pass** or **fail** and describe what went wrong for failures. Example:
+### 3. Review draft
 
-> "Run 3 failed — it skipped the eligibility check in step 2"
+Claude generates the skill and asks you to review in your editor. Check that the workflow, citations, and terminology are correct. Type **looks good** or describe what to change.
 
-Claude analyzes the failure patterns and proposes specific fixes. Review the proposed changes and approve the ones that make sense. Then re-run to verify.
+### 4. Test
 
-Repeat until all cases pass consistently.
+Claude offers a sample run. Say **yes** for a quick check. For thorough testing, say **full validation** — Claude runs the skill 5 times per test case, shows what's consistent vs. variable, and you mark each run pass or fail. Claude proposes fixes for failures and re-runs until you're satisfied.
 
-## Step 6: Finalize
+### 5. Finalize
 
-Claude checks the skill for formatting issues and asks where to save it. Choose your project's skills directory and commit.
+Claude lints and promotes the skill to your chosen location.
+
+## Path B: Full Workflow (From Scratch)
+
+Best for complex skills that benefit from design exploration and iterative development.
+
+```
+/skill-bench
+```
+
+Five phases: **Design** (brainstorm approaches) → **Plan** (generate implementation tasks) → **Build & Test** (execute with simulated + pressure testing) → **Validate** (multirun consistency testing) → **Finalize** (lint + promote).
+
+Requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
 ## Quick Reference
 
 | You want to... | Say... |
 |---|---|
-| Create a skill from documents | `/skill-bench-express [description + URLs]` |
-| Skip the triage summary | "skip" |
+| Create from documents | `/skill-bench-express [description + URLs]` |
+| Create from scratch | `/skill-bench` |
+| Skip triage | "skip" |
 | Approve a step | "y" or "looks good" |
-| Fix something in the draft | Describe what's wrong, or edit the file yourself and say "I edited it" |
-| Run a quick test | "yes" (when offered sample run) |
-| Run thorough testing | "full validation" |
-| Mark a test run as failed | "run 3 failed — [what went wrong]" |
-| Approve all proposed fixes | "approve all" |
-| Approve some fixes | "approve fix 1 and 3" |
-| Stop testing | "validation complete" |
+| Edit the draft yourself | Edit in your editor, then say "I edited it" |
+| Quick test | "yes" (when offered sample run) |
+| Thorough testing | "full validation" |
+| Mark a run as failed | "run 3 failed — [what went wrong]" |
+| Approve proposed fixes | "approve all" or "approve fix 1 and 3" |
+| Finish testing | "validation complete" |
+| Check existing drafts | "show me my skill drafts" |

@@ -1,0 +1,23 @@
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (if dependencies added later)
+node_modules/
+npm-debug.log*
+
+# Skill Bench runtime artifacts
+.skillbench/test-history/
