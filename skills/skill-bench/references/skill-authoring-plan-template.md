@@ -7,7 +7,7 @@ This template adapts writing-plans' task format for skill authoring. Provide thi
 Code plans: write test → implement → run test → commit
 Skill plans: define behavior → baseline test → write section → simulate → pressure test → commit
 
-This maps to writing-skills' RED → GREEN → REFACTOR cycle:
+This maps to the RED → GREEN → REFACTOR cycle:
 - Steps 1-3 = **RED** (baseline fails without skill)
 - Step 4 = **GREEN** (write minimal skill to pass)
 - Steps 5-7 = **REFACTOR** (test, find gaps, close loopholes)
@@ -41,6 +41,8 @@ A prompt that tests this behavior WITHOUT the skill. Must:
 - [ ] **Step 3: Run baseline test (RED)**
 
 Spawn subagent WITHOUT skill. Give it the pressure scenario. Document:
+
+Use the Agent tool to spawn a fresh subagent. Do NOT load the skill being tested — the point is to observe natural behavior without it.
 - What the agent did
 - Rationalizations used (verbatim)
 
@@ -51,7 +53,7 @@ Expected: Agent violates or skips the target behavior.
 Write the SKILL.md content addressing violations from Step 3.
 [Show exact markdown content]
 
-After writing, report: `SKILL.md: {lines} lines (~{lines * 6} tokens)`
+After writing, report line count and token estimate (lines multiplied by 6): `SKILL.md: 142 lines (~852 tokens)`
 
 - [ ] **Step 5: Run simulated test**
 
