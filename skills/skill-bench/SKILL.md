@@ -1,13 +1,13 @@
 ---
 name: skill-bench
-description: "Use when authoring new Claude Code skills or refining existing skill prompts. Guides a structured workflow: design via brainstorming, plan the skill structure, build with TDD pressure testing, and finalize with validation."
+description: "Use when authoring new Claude Code skills or refining existing skill prompts. Guides a structured workflow: design via brainstorming, plan the skill structure, build with TDD pressure testing, validate with multirun consistency testing, and finalize."
 ---
 
 # Skill Bench
 
 Interactive workbench for creating, testing, and refining Claude Code skills through structured conversation.
 
-You guide the user through four phases: designing the skill (via brainstorming), planning the structure, building and testing with TDD (simulated execution + pressure testing), and finalizing with validation. You invoke superpowers skills at phase boundaries and provide skill-authoring context.
+You guide the user through five phases: designing the skill (via brainstorming), planning the structure, building and testing with TDD (simulated execution + pressure testing), validating with multirun consistency testing, and finalizing. You invoke superpowers skills at phase boundaries and provide skill-authoring context.
 
 ## Dependency Check
 
@@ -104,7 +104,45 @@ Spec compliance must pass before behavioral testing. Both must pass before marki
 
 **Exit gate:** All plan tasks complete. All reviews (spec compliance + behavioral testing) pass.
 
-## Phase 4: Finalize
+## Phase 4: Validate
+
+**Multirun consistency testing** — run the skill draft against real test cases multiple times, compare outputs, collect user judgment, and refine.
+
+### Setup
+
+1. **Check for test case library** — Look for `.skillbench/test-cases/{skill-name}.json`
+   - If it exists, read it and confirm the cases with the user
+   - If it doesn't exist, prompt the user to create it:
+     > "Create your test case library at `.skillbench/test-cases/{skill-name}.json`. Format:"
+     > ```json
+     > {
+     >   "run_count": 5,
+     >   "cases": [
+     >     {
+     >       "name": "case-name",
+     >       "prompt": "input prompt for this case",
+     >       "reference_files": ["path/to/reference.pdf"],
+     >       "description": "what this case tests"
+     >     }
+     >   ]
+     > }
+     > ```
+   Wait for the user to create the file before proceeding.
+
+2. **Verify skill draft exists** — Confirm `{drafts_dir}/{skill-name}/SKILL.md` exists from Phase 3. If not, return to Phase 3.
+
+### Execution
+
+Use the Agent tool to spawn the **consistency-tester** agent with:
+- Skill draft path: `{drafts_dir}/{skill-name}/SKILL.md`
+- Test case library path: `.skillbench/test-cases/{skill-name}.json`
+- Test history directory: `.skillbench/test-history/{skill-name}/`
+
+The consistency-tester handles the full validation loop: run collection → consistency summary → user judgment → failure analysis → skill refinement → re-run recommendations. It loops until the user declares validation complete.
+
+**Exit gate:** User declares validation complete.
+
+## Phase 5: Finalize
 
 Validate the skill and promote to its final location. Load `references/anti-patterns.md` for the lint checklist.
 
