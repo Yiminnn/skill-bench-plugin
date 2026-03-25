@@ -1,0 +1,63 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What This Is
+
+A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (4-phase workflow: Design → Plan → Build & Test → Finalize) plus two companion agents (`skill-tester`, `skill-explorer`).
+
+**Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
+
+Install: `claude plugins add https://github.com/deffai/skill-bench-plugin`
+
+## Development
+
+No build, test, or lint commands — the entire codebase is markdown files and a JSON plugin manifest. Validation happens at skill-authoring time via the lint pass in Phase 4 of the workflow.
+
+## Architecture
+
+```
+.claude-plugin/plugin.json   # Plugin manifest — declares skills/ and agents/ dirs
+skills/skill-bench/
+  SKILL.md                   # Main skill: thin orchestrator invoking superpowers at phase boundaries
+  references/
+    skill-format.md          # Frontmatter schema + size budgets for SKILL.md files
+    anti-patterns.md         # Lint checklist used in Phase 4 (Finalize)
+    skill-authoring-plan-template.md  # Adapts writing-plans' task format for skill authoring
+agents/
+  skill-tester.md            # Opus agent: simulates skill execution, returns structured eval
+  skill-explorer.md          # Haiku agent: read-only scanner for drafts and test history
+```
+
+`plugin.json` points to `./skills/` and `./agents/` — the plugin loader discovers contents by convention.
+
+### Phase → Superpowers Mapping
+
+| Phase | Superpowers Skill | What It Does |
+|-------|-------------------|-------------|
+| 1. Design | `superpowers:brainstorming` | Collaborative design spec with 2-3 approaches |
+| 2. Plan | `superpowers:writing-plans` | Bite-sized tasks using skill-authoring template |
+| 3. Build & Test | `superpowers:subagent-driven-development` | Execute tasks with spec + behavioral review |
+| 4. Finalize | (skill-bench native) | Lint, CSO check, promote |
+
+### Reviewer Roles in Phase 3
+
+- **Reviewer 1 (Spec Compliance):** Checks against design spec + `skill-format.md`
+- **Reviewer 2 (Behavioral Testing):** Spawns `skill-tester` for simulated execution + pressure tests from writing-skills TDD
+
+### Runtime Artifacts (created in user projects, not this repo)
+
+- `.skillbench/config.json` — project config (drafts_dir, test_model, context_files)
+- `.skillbench/specs/{skill-name}-design.md` — design specs from Phase 1
+- `.skillbench/plans/{skill-name}-plan.md` — implementation plans from Phase 2
+- `.skillbench/test-history/{skill-name}/` — simulated + pressure test results
+- `skills/drafts/` — default location for in-progress skill drafts
+
+## Conventions
+
+- Skill names must be kebab-case: `^[a-z0-9]+(-[a-z0-9]+)*$`
+- Skill descriptions must start with "Use when" or "Use this when"
+- SKILL.md files should stay under 200 lines; split heavy content into `references/`
+- Token estimate for markdown: `lines * 6`
+- The skill-explorer agent is read-only — it must never write files
+- The skill-tester agent uses model `opus`; skill-explorer uses `haiku`
