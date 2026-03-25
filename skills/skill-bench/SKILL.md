@@ -1,28 +1,58 @@
 ---
 name: skill-bench
-description: "Use when authoring new Claude Code skills or refining existing skill prompts. Guides a multi-phase conversation: gather intent, draft skill files, test via simulated execution, and finalize with linting and validation."
+description: "Use when authoring new Claude Code skills or refining existing skill prompts. Guides a structured workflow: design via brainstorming, plan the skill structure, build with TDD pressure testing, and finalize with validation."
 ---
 
 # Skill Bench
 
-Interactive workbench for creating, testing, and refining Claude Code skills through conversation.
+Interactive workbench for creating, testing, and refining Claude Code skills through structured conversation.
 
-You guide the user through four phases: understanding what the skill should do, drafting the skill files, testing via simulated execution, and finalizing with validation. You write files directly and spawn agents for isolated tasks.
+You guide the user through four phases: designing the skill (via brainstorming), planning the structure, building and testing with TDD (simulated execution + pressure testing), and finalizing with validation. You invoke superpowers skills at phase boundaries and provide skill-authoring context.
 
-## Phase 1: Intent Gathering
+## Dependency Check
 
-Before writing any files, understand what the user wants to build.
+Before starting any phase, verify the superpowers plugin is installed:
 
-1. **Ask what the skill should do** — What task does it guide? Who uses it? When should Claude invoke it?
-2. **Get 1-2 example scenarios** — Concrete situations where the skill would activate.
-3. **Check for name collisions** — Glob `skills/**/SKILL.md` and `agents/**/*.md` in the project. If a skill with the same or similar name exists, warn the user about shadowing and ask if they want to extend the existing skill or create a new one.
-4. **Determine scope** — Will this skill need reference docs? A companion agent? Helper scripts? A simple skill (< 100 lines, single file) or a structured skill (multi-file with references)?
+1. Check if `superpowers:brainstorming` skill is available via the Skill tool
+2. If not available, run: `claude plugins add claude-plugins-official/superpowers`
+3. Verify installation succeeded
+4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugins add claude-plugins-official/superpowers`" — then stop
 
-**Exit gate:** You can describe the skill in one sentence, name it, and list its key capabilities. Confirm with the user before proceeding.
+## Phase 1: Design
 
-## Phase 2: Draft & Scaffold
+**REQUIRED SUB-SKILL:** Use `superpowers:brainstorming`
 
-Create the skill files iteratively. Load `references/skill-format.md` for the frontmatter schema before starting.
+Before invoking brainstorming:
+
+1. **Set spec location:** Tell brainstorming: "Save the design spec to `.skillbench/specs/{skill-name}-design.md`"
+2. **Provide skill-authoring context:** Read `references/skill-format.md` and summarize for brainstorming:
+   - A Claude Code skill is a SKILL.md file with YAML frontmatter (`name`, `description`) and markdown content
+   - `name` must be kebab-case: `^[a-z0-9]+(-[a-z0-9]+)*$`
+   - `description` must start with "Use when", max 1024 chars, trigger-oriented (not workflow-summarizing)
+   - SKILL.md should stay under 200 lines; heavy content splits to `references/`
+   - Token estimate: `lines * 6`
+   - Skills can include companion agents (`.md` files in `agents/`)
+3. **Check for name collisions:** Glob `skills/**/SKILL.md` and `agents/**/*.md`. Warn about shadowing.
+
+Then invoke brainstorming. It handles: clarifying questions, 2-3 approaches with trade-offs, sectioned design for approval, spec writing and commit.
+
+**Exit gate:** User-approved design spec exists in `.skillbench/specs/`.
+
+## Phase 2: Plan
+
+**REQUIRED SUB-SKILL:** Use `superpowers:writing-plans`
+
+Before invoking writing-plans:
+
+1. **Set plan location:** Tell writing-plans: "Save the plan to `.skillbench/plans/{skill-name}-plan.md`"
+2. **Load plan template:** Read `references/skill-authoring-plan-template.md` and provide it as context so writing-plans produces skill-authoring tasks (define behavior → baseline test → write section → simulate → pressure test) instead of code-oriented tasks.
+3. **Provide the design spec:** Read `.skillbench/specs/{skill-name}-design.md`
+
+Then invoke writing-plans. It handles: file structure mapping, bite-sized task creation, self-review, plan writing and commit.
+
+**Exit gate:** User-approved plan exists in `.skillbench/plans/`.
+
+## Phase 3: Build & Test
 
 ### Setup
 
@@ -36,129 +66,47 @@ Create the skill files iteratively. Load `references/skill-format.md` for the fr
    ```
    Read the config if it exists. Use `drafts_dir` as the base directory for new drafts.
 
-   If `.gitignore` exists in the project root and doesn't already mention `.skillbench`, offer to add:
+2. **Update .gitignore** — If `.gitignore` exists and doesn't mention `.skillbench`, offer to add:
    ```
-   # Skill Bench test history (may contain large thinking traces)
+   # Skill Bench test history
    .skillbench/test-history/
    ```
-   Note: `.skillbench/config.json` can be committed for team sharing.
 
-2. **Create the draft directory** — `{drafts_dir}/{skill-name}/SKILL.md`
+3. **Create the draft directory** — `{drafts_dir}/{skill-name}/`
 
-### Drafting Loop
+### Execution
 
-1. **Generate frontmatter** — Validate against the schema in `references/skill-format.md`:
-   - `name`: must match `^[a-z0-9]+(-[a-z0-9]+)*$`
-   - `description`: must start with "Use when", max 1024 chars
-   - `model`: omit unless the skill requires a specific model
+**REQUIRED SUB-SKILL:** Use `superpowers:subagent-driven-development`
 
-2. **Write the skill content** — Follow the standard structure:
-   - H1 title
-   - Overview (2-5 lines)
-   - Workflow/process sections
-   - Quality gates (for multi-step workflows)
-   - References section (if using reference files)
+Provide these role adaptations for skill authoring:
 
-3. **Track size** — After every write, report:
-   > `{filename}: {lines} lines (~{lines * 6} tokens)`
-   - At 200+ lines: suggest splitting heavy sections to `references/`
-   - At 300+ lines: strongly recommend splitting, warn about context budget impact
+**Implementer:** Writes skill sections and reference files following the plan. Self-reviews against `references/skill-format.md`. Reports standard status (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED).
 
-4. **Auto-split** — When content exceeds the threshold, extract sections into reference files:
-   - API specs → `references/api.md`
-   - Example collections → `references/examples.md`
-   - Pattern libraries → `references/patterns.md`
-   - Update SKILL.md to reference them: `See references/api.md for details.`
+**Reviewer 1 — Spec Compliance:** Checks skill section against the design spec from Phase 1. Validates frontmatter, size budgets, and cross-references against `references/skill-format.md`.
 
-5. **Companion agents** — If the skill describes spawning a specialized agent:
-   - Ask the user if they want to draft the agent definition now
-   - If yes, create `agents/{agent-name}.md` with proper frontmatter (see `references/skill-format.md` for agent schema)
-   - The skill SKILL.md should reference it: `Use **{agent-name}** agent for...`
+**Reviewer 2 — Behavioral Testing:** Replaces code quality review. Runs two tests:
+1. **Simulated execution** — spawns the **skill-tester** agent with current SKILL.md draft + sample input from the plan
+2. **Pressure test** — spawns a fresh subagent WITH the skill loaded, gives it the baseline pressure scenario from the plan task
 
-### Concurrent Edit Protection
+Spec compliance must pass before behavioral testing. Both must pass before marking a task complete.
 
-Before every Write or Edit to a draft file:
-1. Read the file and compute SHA256 of its content
-2. Compare to the last-known hash (stored in your conversation context)
-3. If they differ: show the user what changed (summarize the diff), ask whether to:
-   - **Overwrite** with your version
-   - **Incorporate** their changes into your next draft
-   - **Keep** their version and adjust your suggestions
-4. Update the stored hash after every successful write
+### Operational Rules
 
-**Exit gate:** The user has reviewed the draft content and is ready to test. At least one SKILL.md file exists.
+**Size tracking:** After each task, report `{filename}: {lines} lines (~{lines * 6} tokens)`. At 200+ lines suggest splitting to `references/`. At 300+ lines strongly recommend splitting.
 
-## Phase 3: Test & Refine
+**Concurrent edit protection:** Before every Write or Edit to a draft file, read the file and compute SHA256. Compare to last-known hash. If different: show what changed, ask whether to overwrite, incorporate, or keep. Update hash after successful write.
 
-Test the draft skill via simulated execution. This is an iterative loop — test, review results, refine, re-test.
+**Test history:** Save to `.skillbench/test-history/{skill-name}/`:
+- `{timestamp}.json` — simulated test results (existing format)
+- `{timestamp}-pressure.json` — pressure test results
 
-### Running a Test
-
-1. **Get sample input** from the user:
-   - Inline text pasted into the conversation
-   - A file path to read as input (use Read tool to get contents)
-
-2. **Gather context files** (optional):
-   - Read `context_files` from `.skillbench/config.json`
-   - The user can specify additional files for this test run
-   - Context files simulate the project context a skill would have in a real invocation
-
-3. **Spawn the skill-tester agent** with:
-   - The full content of the draft SKILL.md
-   - All reference file contents (from `references/` directory)
-   - The sample input
-   - Context file contents (if any)
-   - The test model from config (default: `claude-opus-4-6`)
-
-4. **Present results** to the user:
-   - Status (pass/partial/fail) and summary
-   - Output preview (what the skill would produce)
-   - Issues found
-   - Key thinking trace excerpts for debugging skill logic
-   - Suggested next test cases (from the tester agent)
-
-5. **Save test history** — Write to `.skillbench/test-history/{skill-name}/{timestamp}.json`:
-   ```json
-   {
-     "skill_name": "{name}",
-     "skill_hash": "sha256:{hash of SKILL.md content}",
-     "timestamp": "{ISO 8601}",
-     "model": "{test model}",
-     "sample_input_summary": "{first 200 chars of input}",
-     "sample_input_source": "{inline | filepath}",
-     "context_files": ["{list of context file paths}"],
-     "result": {
-       "status": "pass | partial | fail",
-       "summary": "{one-line assessment}",
-       "issues": ["{specific problems}"],
-       "suggested_next_tests": ["{edge cases to try}"]
-     },
-     "thinking_trace_summary": "{key reasoning steps}",
-     "token_usage": {
-       "approximate_input_lines": 0,
-       "approximate_output_lines": 0
-     },
-     "fidelity_note": "Simulated execution. Not simulated: CLAUDE.md injection, conversation history, MCP server access, hook execution, tool results from prior turns, IDE context."
-   }
-   ```
-
-### Refinement Loop
-
-After reviewing test results:
-1. Discuss what to change with the user
-2. Edit the draft (with hash-check — see Phase 2)
-3. Re-test with the same or new input
-4. Repeat until the user is satisfied
-
-**Exit gate:** The user considers the skill "good enough" and wants to finalize. At least one test has been run.
+**Exit gate:** All plan tasks complete. All reviews (spec compliance + behavioral testing) pass.
 
 ## Phase 4: Finalize
 
-Validate the skill and move it to its final location. Load `references/anti-patterns.md` for the lint checklist.
+Validate the skill and promote to its final location. Load `references/anti-patterns.md` for the lint checklist.
 
 ### Lint Pass
-
-Run each check from `references/anti-patterns.md` against the draft:
 
 1. **Frontmatter validation:**
    - `name` matches `^[a-z0-9]+(-[a-z0-9]+)*$`
@@ -172,37 +120,29 @@ Run each check from `references/anti-patterns.md` against the draft:
    - Size within budget (report final line count + token estimate)
 
 3. **Reference validation:**
-   - Scan for `skill: \`name\`` patterns — Glob to verify each exists
-   - Scan for `**name** agent` patterns — Glob to verify each exists
-   - Warn about broken references
+   - Scan for `skill: \`name\`` — Glob to verify each exists
+   - Scan for `**name** agent` — Glob to verify each exists
 
-4. **Description quality:**
-   - Check trigger specificity (not too vague)
-   - Glob existing `**/SKILL.md` files, compare descriptions for overlap
+4. **Description quality (CSO):**
+   - Description is trigger-oriented, not workflow-summarizing
+   - Glob existing `**/SKILL.md` files, check for description overlap
+   - Keywords present for discovery
 
-Present all findings to the user. Distinguish between:
-- **Blocking:** Must fix before finalizing (broken references, invalid frontmatter)
-- **Warning:** Should fix (size over budget, vague description)
-- **Info:** Optional improvements (missing quality gates section)
+5. **Token efficiency:**
+   - Report word count (`wc -w`) and line count
+   - Flag if SKILL.md exceeds 200 lines or SKILL.md + references exceeds 500 lines
+
+6. **Flowchart review** (if skill contains `digraph` blocks):
+   - Used only for non-obvious decision points, not linear instructions
+   - Labels have semantic meaning (not "step1", "helper2")
+   - No code in flowchart labels
+
+Present findings as **Blocking** (must fix), **Warning** (should fix), **Info** (optional).
 
 ### Promotion
 
-After lint issues are resolved:
-
-1. **Ask target location** — Where should the final skill live? Options:
-   - Project-local: `skills/{skill-name}/` (in the current repo)
-   - Plugin: a Claude Code plugin directory
-   - Custom path
-
-2. **Move files** — Copy from `{drafts_dir}/{skill-name}/` to the target location. Include all reference files, scripts, and companion agents.
-
-3. **Verify move** — Glob the target to confirm all files landed correctly.
-
-4. **Suggest commit:**
-   ```
-   feat: add {skill-name} skill
-
-   {One-line description of what the skill does}
-   ```
-
-5. **Clean up draft** — Ask the user if they want to remove the draft directory. The `.skillbench/test-history/` entries are preserved regardless.
+1. **Ask target location:** Project-local `skills/{skill-name}/`, plugin directory, or custom path
+2. **Move files** from `{drafts_dir}/{skill-name}/` to target. Include references, scripts, companion agents.
+3. **Verify move** — Glob target to confirm all files landed.
+4. **Suggest commit:** `feat: add {skill-name} skill`
+5. **Clean up** — Ask if user wants to remove draft directory. Test history is preserved.
