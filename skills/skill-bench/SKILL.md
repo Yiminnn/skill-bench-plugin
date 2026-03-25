@@ -47,6 +47,7 @@ Before invoking writing-plans:
 1. **Set plan location:** Tell writing-plans: "Save the plan to `.skillbench/plans/{skill-name}-plan.md`"
 2. **Load plan template:** Read `references/skill-authoring-plan-template.md` and provide it as context so writing-plans produces skill-authoring tasks (define behavior → baseline test → write section → simulate → pressure test) instead of code-oriented tasks.
 3. **Provide the design spec:** Read `.skillbench/specs/{skill-name}-design.md`
+   If the spec file does not exist, return to Phase 1 before proceeding.
 
 Then invoke writing-plans. It handles: file structure mapping, bite-sized task creation, self-review, plan writing and commit.
 
@@ -86,6 +87,7 @@ Provide these role adaptations for skill authoring:
 
 **Reviewer 2 — Behavioral Testing:** Replaces code quality review. Runs two tests:
 1. **Simulated execution** — spawns the **skill-tester** agent with current SKILL.md draft + sample input from the plan
+   (Use the Agent tool to spawn the skill-tester agent, which is registered by this plugin)
 2. **Pressure test** — spawns a fresh subagent WITH the skill loaded, gives it the baseline pressure scenario from the plan task
 
 Spec compliance must pass before behavioral testing. Both must pass before marking a task complete.
