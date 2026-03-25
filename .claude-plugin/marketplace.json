@@ -1,0 +1,23 @@
+{
+  "name": "skill-bench-marketplace",
+  "owner": {
+    "name": "Yimin Liu",
+    "email": "yiminliu.career@gmail.com"
+  },
+  "metadata": {
+    "description": "Interactive skill authoring for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "skill-bench",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Yiminnn/skill-bench-plugin.git"
+      },
+      "description": "Interactive skill authoring bench — create, test, and refine Claude Code skills through conversation",
+      "version": "0.4.0",
+      "strict": true
+    }
+  ]
+}

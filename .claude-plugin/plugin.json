@@ -6,8 +6,5 @@
     "name": "Yiminnn"
   },
   "license": "MIT",
-  "keywords": ["skills", "authoring", "testing", "workflows"],
-  "dependencies": ["claude-plugins-official/superpowers"],
-  "skills": "./skills/",
-  "agents": "./agents/"
+  "keywords": ["skills", "authoring", "testing", "workflows"]
 }
