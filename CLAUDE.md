@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (4-phase workflow: Design → Plan → Build & Test → Finalize) plus two companion agents (`skill-tester`, `skill-explorer`).
+A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) plus three companion agents (`skill-tester`, `consistency-tester`, `skill-explorer`).
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
@@ -25,6 +25,7 @@ skills/skill-bench/
     anti-patterns.md         # Lint checklist used in Phase 4 (Finalize)
     skill-authoring-plan-template.md  # Adapts writing-plans' task format for skill authoring
 agents/
+  consistency-tester.md      # Opus agent: multirun validation — runs skill-tester N times, compares, collects judgment, refines
   skill-tester.md            # Opus agent: simulates skill execution, returns structured eval
   skill-explorer.md          # Haiku agent: read-only scanner for drafts and test history
 ```
@@ -38,7 +39,8 @@ agents/
 | 1. Design | `superpowers:brainstorming` | Collaborative design spec with 2-3 approaches |
 | 2. Plan | `superpowers:writing-plans` | Bite-sized tasks using skill-authoring template |
 | 3. Build & Test | `superpowers:subagent-driven-development` | Execute tasks with spec + behavioral review |
-| 4. Finalize | (skill-bench native) | Lint, CSO check, promote |
+| 4. Validate | (skill-bench native via consistency-tester) | Multirun testing, user judgment, pattern analysis, refinement |
+| 5. Finalize | (skill-bench native) | Lint, CSO check, promote |
 
 ### Reviewer Roles in Phase 3
 
@@ -51,6 +53,7 @@ agents/
 - `.skillbench/specs/{skill-name}-design.md` — design specs from Phase 1
 - `.skillbench/plans/{skill-name}-plan.md` — implementation plans from Phase 2
 - `.skillbench/test-history/{skill-name}/` — simulated + pressure test results
+- `.skillbench/test-cases/{skill-name}.json` — test case library for multirun validation
 - `skills/drafts/` — default location for in-progress skill drafts
 
 ## Conventions
@@ -60,4 +63,4 @@ agents/
 - SKILL.md files should stay under 200 lines; split heavy content into `references/`
 - Token estimate for markdown: `lines * 6`
 - The skill-explorer agent is read-only — it must never write files
-- The skill-tester agent uses model `opus`; skill-explorer uses `haiku`
+- The skill-tester and consistency-tester agents use model `opus`; skill-explorer uses `haiku`
