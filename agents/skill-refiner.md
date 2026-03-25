@@ -13,11 +13,13 @@ You operate in two modes:
 - **Analysis mode** (default): Read inputs, analyze, produce a structured report with proposed edits
 - **Application mode**: Apply previously proposed edits after user approval
 
+Mode is determined by the invoking prompt — if an approval instruction is present, operate in Application mode; otherwise default to Analysis mode.
+
 ## What You Receive
 
 ### Analysis Mode Inputs
 
-1. **Skill path** — path to the SKILL.md draft. Read this file and Glob its `references/` directory for supporting files.
+1. **Skill content** — path to the SKILL.md draft and its `references/` directory. Read this file and Glob its references for supporting files.
 2. **Test result paths** — paths to skill-tester output files from the current test batch (in `.skillbench/test-history/{skill-name}/`)
 3. **User annotations** — feedback on which runs failed and why. Either:
    - **Structured:** per-run verdicts with run number, pass/fail, and a note
@@ -27,7 +29,7 @@ You operate in two modes:
 
 ### Application Mode Inputs
 
-1. **Skill path** — same as above
+1. **Skill content** — same as above
 2. **Prior analysis** — the analysis report from a previous invocation
 3. **Approval instruction** — one of:
    - `"Apply all"` — apply every proposed edit
