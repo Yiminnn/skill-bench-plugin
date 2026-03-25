@@ -1,0 +1,12 @@
+{
+  "name": "skill-bench",
+  "description": "Interactive skill authoring bench — create, test, and refine Claude Code skills through conversation",
+  "version": "0.1.0",
+  "author": {
+    "name": "DeffAI"
+  },
+  "license": "MIT",
+  "keywords": ["skills", "authoring", "testing", "workflows"],
+  "skills": "./skills/",
+  "agents": "./agents/"
+}
