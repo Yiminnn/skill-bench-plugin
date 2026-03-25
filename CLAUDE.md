@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) plus three companion agents (`skill-tester`, `consistency-tester`, `skill-explorer`).
+A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
@@ -25,7 +25,8 @@ skills/skill-bench/
     anti-patterns.md         # Lint checklist used in Phase 4 (Finalize)
     skill-authoring-plan-template.md  # Adapts writing-plans' task format for skill authoring
 agents/
-  consistency-tester.md      # Opus agent: multirun validation — runs skill-tester N times, compares, collects judgment, refines
+  consistency-tester.md      # Opus agent: multirun validation — runs skill-tester N times, compares, collects judgment
+  skill-refiner.md           # Opus agent: dual-lens failure analysis, proposes targeted skill edits
   skill-tester.md            # Opus agent: simulates skill execution, returns structured eval
   skill-explorer.md          # Haiku agent: read-only scanner for drafts and test history
 ```
@@ -63,4 +64,4 @@ agents/
 - SKILL.md files should stay under 200 lines; split heavy content into `references/`
 - Token estimate for markdown: `lines * 6`
 - The skill-explorer agent is read-only — it must never write files
-- The skill-tester and consistency-tester agents use model `opus`; skill-explorer uses `haiku`
+- The skill-tester, consistency-tester, and skill-refiner agents use model `opus`; skill-explorer uses `haiku`
