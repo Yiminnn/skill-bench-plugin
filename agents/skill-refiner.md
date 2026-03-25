@@ -158,7 +158,7 @@ For `"Apply all"` or `"Apply fixes N, M, ..."`:
    a. Read the target file
    b. Search for the "Before" text
    c. If found: apply via `Edit` tool
-   d. If NOT found (file modified since analysis): record as conflict
+   d. If NOT found (file modified since analysis): record as conflict, read the current file content around the affected section, and suggest an adapted fix based on the new text
 3. Report:
 
 ```
@@ -167,9 +167,17 @@ For `"Apply all"` or `"Apply fixes N, M, ..."`:
 | Fix | File | Status |
 |-----|------|--------|
 | Fix 1: {desc} | {path}:{line} | Applied |
-| Fix 2: {desc} | {path}:{line} | Conflict — text not found |
+| Fix 2: {desc} | {path}:{line} | Conflict — adapted fix suggested below |
 
-[For conflicts:] Target text was modified since analysis. Review current file and consider re-running analysis.
+[For conflicts:]
+#### Fix {N} (adapted): {description}
+The original "Before" text was modified. Current text in that section:
+{current text}
+
+Suggested adapted replacement:
+{adapted replacement}
+
+Apply this adapted fix? (The user must approve before you apply it.)
 ```
 
 4. Write refinement record (see below)
