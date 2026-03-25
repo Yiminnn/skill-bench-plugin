@@ -2,18 +2,15 @@
 
 A Claude Code plugin for interactive skill authoring. Create, test, and refine Claude Code skills through conversation.
 
-## Prerequisites
+Two paths to a working skill:
 
-Skill Bench requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin. It will be installed automatically on first use, or you can install it manually:
-
-```bash
-claude plugins add claude-plugins-official/superpowers
-```
+- **`skill-bench`** — Full 5-phase workflow for complex skills: Design → Plan → Build & Test → Validate → Finalize
+- **`skill-bench-express`** — Fast path from reference documents + prompt to working skill: Parse → Fetch → Triage → Generate → Present → Finalize
 
 ## Install
 
 ```bash
-claude plugins add https://github.com/deffai/skill-bench-plugin
+claude plugins add https://github.com/Yiminnn/skill-bench-plugin
 ```
 
 Or install locally for development:
@@ -22,51 +19,90 @@ Or install locally for development:
 claude plugins add /path/to/skill-bench-plugin
 ```
 
-## What It Does
+### Prerequisites
 
-Skill Bench guides you through creating Claude Code skills in five phases:
+The full workflow (`skill-bench`) requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin. It will be installed automatically on first use, or manually:
 
-1. **Design** — Brainstorm what your skill should do, explore approaches, produce a design spec
-2. **Plan** — Generate a structured implementation plan with TDD-style tasks
-3. **Build & Test** — Execute the plan with simulated testing and pressure testing
-4. **Validate** — Run the skill against real test cases multiple times, compare consistency, refine based on user feedback
-5. **Finalize** — Lint, validate references, and promote to your target location
+```bash
+claude plugins add claude-plugins-official/superpowers
+```
 
-Each phase delegates to a superpowers skill:
-
-| Phase | Skill | Purpose |
-|-------|-------|---------|
-| Design | `superpowers:brainstorming` | Collaborative design with trade-off analysis |
-| Plan | `superpowers:writing-plans` | Bite-sized tasks adapted for skill authoring |
-| Build & Test | `superpowers:subagent-driven-development` | Execute with spec review + behavioral testing |
-| Validate | skill-bench native (consistency-tester agent) | Multirun consistency testing + user-guided refinement |
-| Finalize | skill-bench native | Lint pass + promotion |
-
-## Components
-
-| Component | Type | Purpose |
-|-----------|------|---------|
-| `skill-bench` | Skill | Main authoring workflow — orchestrates the 4-phase conversation |
-| `skill-tester` | Agent | Simulated skill execution with structured evaluation |
-| `consistency-tester` | Agent | Multirun validation — consistency analysis, user judgment, pattern-based refinement |
-| `skill-explorer` | Agent | Browse and summarize existing skill drafts |
+The express path (`skill-bench-express`) has no plugin dependencies.
 
 ## Usage
 
-### Start authoring a new skill
+### Express: Create a skill from reference documents
 
-Invoke the skill-bench skill in Claude Code. It will walk you through the process.
+Best for domain experts who have reference documents and know what the skill should do. Provide a description with embedded URLs and role annotations:
+
+```
+/skill-bench-express create a new skill for 361 HCT/P assessment,
+here is the FDA guidance document that you should follow step by step
+using the decision tree as the main guide for workflow:
+https://www.fda.gov/media/109176/download
+
+For the same surgical procedure exemption step, follow the
+recommendations in this guidance and make this a separate reference:
+https://www.fda.gov/media/89920/download
+
+The regulations that underlie this framework should serve as the
+ground truth and be a separate reference:
+https://www.ecfr.gov/current/title-21/chapter-I/subchapter-L/part-1271
+```
+
+The express path:
+1. Classifies each resource by role (primary guide, ground truth, named reference, background)
+2. Fetches and extracts content at role-appropriate depth
+3. Shows a triage summary for confirmation
+4. Generates a SKILL.md + reference files
+5. Presents the draft for editor review
+6. Optionally runs a sample test or full multirun validation
+7. Lints and promotes to final location
+
+### Full workflow: Author a skill from scratch
+
+Best for complex skills that benefit from design exploration and iterative TDD:
+
+```
+/skill-bench
+```
+
+The full workflow:
+1. **Design** — Brainstorm approaches, produce a design spec via `superpowers:brainstorming`
+2. **Plan** — Generate implementation tasks with TDD steps via `superpowers:writing-plans`
+3. **Build & Test** — Execute tasks with simulated + pressure testing via `superpowers:subagent-driven-development`
+4. **Validate** — Multirun consistency testing: run the skill N times, compare outputs, collect pass/fail judgments, refine based on failure patterns
+5. **Finalize** — Lint, validate references, promote to target location
+
+### Validate with multirun testing
+
+Available in both paths. The consistency-tester agent runs the skill against real test cases multiple times:
+
+1. Define test cases in `.skillbench/test-cases/{skill-name}.json`
+2. The agent runs each case N times (default: 5) via the skill-tester
+3. A consistency summary shows what's stable vs. variable across runs
+4. You mark each run pass/fail with notes on what's wrong
+5. The skill-refiner agent analyzes failure patterns across runs and proposes targeted edits
+6. You approve edits, re-run, repeat until satisfied
 
 ### Explore existing drafts
 
-Ask Claude to use the skill-explorer agent:
-> "Show me my skill drafts"
+```
+> Show me my skill drafts
+```
 
-### Test a draft
+The skill-explorer agent scans your drafts directory and reports status.
 
-During the Build & Test phase, the workflow automatically runs:
-- **Simulated execution** via the skill-tester agent
-- **Pressure testing** via writing-skills' TDD methodology (baseline without skill → verify compliance with skill)
+## Components
+
+| Component | Type | Model | Purpose |
+|-----------|------|-------|---------|
+| `skill-bench` | Skill | — | Full 5-phase authoring workflow with superpowers orchestration |
+| `skill-bench-express` | Skill | — | Fast path: reference documents + prompt to working skill |
+| `skill-tester` | Agent | Opus | Simulates skill execution, returns structured evaluation with thinking trace |
+| `consistency-tester` | Agent | Opus | Multirun validation: run collection, consistency analysis, user judgment, refinement loop |
+| `skill-refiner` | Agent | Opus | Dual-lens failure analysis (cross-run + per-run), proposes targeted skill edits |
+| `skill-explorer` | Agent | Haiku | Read-only scanner for drafts and test history |
 
 ## Project Config
 
@@ -89,12 +125,29 @@ On first use, Skill Bench creates `.skillbench/config.json` in your project:
 | Directory | Purpose | Git Track? |
 |-----------|---------|------------|
 | `.skillbench/config.json` | Project settings | Yes |
-| `.skillbench/specs/` | Design specs from Phase 1 | Yes |
+| `.skillbench/specs/` | Design specs (brainstormed or auto-generated) | Yes |
 | `.skillbench/plans/` | Implementation plans from Phase 2 | Yes |
-| `.skillbench/test-history/` | Simulated + pressure test results | No (gitignore) |
 | `.skillbench/test-cases/` | Test case libraries for multirun validation | Yes |
+| `.skillbench/test-history/` | Test results, judgments, refinement records | No (gitignore) |
 
-The skill-bench workflow will offer to update `.gitignore` on first use.
+The workflow will offer to update `.gitignore` on first use.
+
+## Shared Infrastructure
+
+Both paths share agents and references — no duplication:
+
+| Shared Component | Used By Express | Used By Full Workflow |
+|------------------|-----------------|----------------------|
+| `skill-format.md` | Generate + Finalize | Phase 1, 3, 5 |
+| `anti-patterns.md` | Finalize | Phase 5 |
+| `skill-tester` agent | Sample Run | Phase 3 (behavioral testing) |
+| `consistency-tester` agent | Escalation from Sample Run | Phase 4 |
+| `skill-refiner` agent | Via consistency-tester | Via consistency-tester |
+| `.skillbench/` artifacts | Config, specs, test history | All artifacts |
+
+### Recovery Path
+
+A skill started with Express can transition to the full workflow. The auto-generated design spec in `.skillbench/specs/` is compatible with `skill-bench` Phase 2 (Plan), so you can switch to TDD-style development mid-stream.
 
 ## License
 

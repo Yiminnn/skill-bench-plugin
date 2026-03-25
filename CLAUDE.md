@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Claude Code plugin for interactive skill authoring. It provides two skill-creation paths — `skill-bench` (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) and `skill-bench-express` (fast path: Fetch → Triage → Generate → Present → Finalize) — plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
+A Claude Code plugin for interactive skill authoring. It provides two skill-creation paths — `skill-bench` (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) and `skill-bench-express` (fast path: Parse → Fetch → Triage → Generate → Present → Sample Run → Finalize) — plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
-Install: `claude plugins add https://github.com/deffai/skill-bench-plugin`
+Install: `claude plugins add https://github.com/Yiminnn/skill-bench-plugin`
 
 ## Development
 
-No build, test, or lint commands — the entire codebase is markdown files and a JSON plugin manifest. Validation happens at skill-authoring time via the lint pass in Phase 4 of the workflow.
+No build, test, or lint commands — the entire codebase is markdown files and a JSON plugin manifest. Validation happens at skill-authoring time via the lint pass in Phase 5 (Finalize) of the workflow.
 
 ## Architecture
 

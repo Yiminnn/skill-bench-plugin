@@ -424,7 +424,7 @@ Replace the content of `.claude-plugin/plugin.json` with:
   "description": "Interactive skill authoring bench — create, test, and refine Claude Code skills through conversation",
   "version": "0.2.0",
   "author": {
-    "name": "DeffAI"
+    "name": "Yiminnn"
   },
   "license": "MIT",
   "keywords": ["skills", "authoring", "testing", "workflows"],
@@ -476,7 +476,7 @@ A Claude Code plugin for interactive skill authoring. It provides a `skill-bench
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
-Install: `claude plugins add https://github.com/deffai/skill-bench-plugin`
+Install: `claude plugins add https://github.com/Yiminnn/skill-bench-plugin`
 
 ## Development
 
@@ -583,7 +583,7 @@ claude plugins add claude-plugins-official/superpowers
 ## Install
 
 ```bash
-claude plugins add https://github.com/deffai/skill-bench-plugin
+claude plugins add https://github.com/Yiminnn/skill-bench-plugin
 ```
 
 Or install locally for development:
