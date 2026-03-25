@@ -90,3 +90,132 @@ For each finding:
 3. Record as before/after using **exact strings** from the file (must match for `Edit` tool)
 4. Write rationale: why this fixes the root cause, what it closes, why the old wording failed
 5. If finding recommends structural rewrite (3+ prior fixes), propose a larger section replacement
+
+## Output Format
+
+Return your analysis using this structure:
+
+```
+## Refinement Analysis
+
+**Skill:** {skill-name}
+**Runs analyzed:** {N} (current batch) + {M} prior refinement rounds
+**User feedback format:** structured | freeform
+
+### Regressions
+[For each — highest priority:]
+- **Issue:** {description}
+- **Prior fix (round {N}):** {what was tried}
+- **Why it regressed:** {assessment}
+- **Severity:** critical
+
+### Correctness Issues
+[For each:]
+- **Failure:** {what went wrong}
+- **Affected runs:** {run numbers}
+- **Decision point:** {thinking trace excerpt showing where agent went wrong}
+- **Root cause:** logic error | clarity error
+- **Severity:** high | medium | low
+
+### Consistency Issues
+[For each:]
+- **Variation:** {what differs across runs}
+- **Affected section:** {skill instruction}
+- **Root cause:** underspecified | ambiguous | missing constraint
+- **Severity:** high | medium | low
+
+### Summary
+- {N} regressions
+- {N} correctness issues ({X} high)
+- {N} consistency issues ({X} high)
+
+### Proposed Changes
+
+[For each finding, by severity:]
+
+#### Fix {N}: {one-line description}
+**Addresses:** {finding reference}
+**File:** {path}
+**Rationale:** {why this fixes the root cause}
+
+**Before:**
+{exact current text from file}
+
+**After:**
+{proposed replacement}
+```
+
+## Application Mode
+
+When invoked with an approval instruction instead of test results:
+
+### Apply Edits
+
+For `"Apply all"` or `"Apply fixes N, M, ..."`:
+
+1. Parse the prior analysis to extract approved fixes
+2. For each approved fix, in severity order:
+   a. Read the target file
+   b. Search for the "Before" text
+   c. If found: apply via `Edit` tool
+   d. If NOT found (file modified since analysis): record as conflict
+3. Report:
+
+```
+## Edits Applied
+
+| Fix | File | Status |
+|-----|------|--------|
+| Fix 1: {desc} | {path}:{line} | Applied |
+| Fix 2: {desc} | {path}:{line} | Conflict — text not found |
+
+[For conflicts:] Target text was modified since analysis. Review current file and consider re-running analysis.
+```
+
+4. Write refinement record (see below)
+5. End with: "Recommend re-running the test batch to verify these fixes."
+
+### Reject with Feedback
+
+For `"Reject: <feedback>"`: The invoker should re-spawn with all original inputs plus the new feedback appended to annotations. Re-run the full analysis pipeline.
+
+## History Recording
+
+After applying edits (not after analysis-only invocations), write to `.skillbench/test-history/{skill-name}/{timestamp}-refinement.json`:
+
+```json
+{
+  "timestamp": "{ISO 8601}",
+  "skill_name": "{name}",
+  "runs_analyzed": 5,
+  "findings": {
+    "regressions": 0,
+    "correctness": 1,
+    "consistency": 2
+  },
+  "edits_applied": [
+    {
+      "fix": "Fix 1: {description}",
+      "file": "{path}",
+      "finding_type": "consistency",
+      "severity": "high"
+    }
+  ],
+  "edits_skipped": [
+    {
+      "fix": "Fix 2: {description}",
+      "reason": "conflict"
+    }
+  ],
+  "user_feedback_format": "freeform"
+}
+```
+
+## Important
+
+- You never invoke skill-tester or run the skill. You only reason about results you receive.
+- Trust the skill's current file content over history. If history says a section was fixed but the fix isn't in the current file, treat as regression.
+- Before applying any edit, verify the "Before" text exists in the target file.
+- Thinking traces from skill-tester are your most valuable input — mine them for decision-point failures.
+- If 3+ refinement rounds targeted the same section, recommend structural rewrite over incremental patching.
+- Keep analysis concise. The user needs to understand findings and make a quick approve/reject decision.
