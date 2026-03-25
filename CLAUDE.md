@@ -8,7 +8,7 @@ A Claude Code plugin for interactive skill authoring. It provides two skill-crea
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
-Install: `claude plugin install https://github.com/Yiminnn/skill-bench-plugin`
+Install: `claude plugin marketplace add https://github.com/Yiminnn/skill-bench-plugin && claude plugin install skill-bench`
 
 ## Development
 

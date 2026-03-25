@@ -5,7 +5,8 @@ Two ways to create skills: **Express** (from reference documents) or **Full** (f
 ## Install
 
 ```bash
-claude plugin install https://github.com/Yiminnn/skill-bench-plugin
+claude plugin marketplace add https://github.com/Yiminnn/skill-bench-plugin
+claude plugin install skill-bench
 ```
 
 ## Path A: Express (Reference Documents → Skill)

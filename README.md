@@ -10,13 +10,8 @@ Two paths to a working skill:
 ## Install
 
 ```bash
-claude plugin install https://github.com/Yiminnn/skill-bench-plugin
-```
-
-Or install locally for development:
-
-```bash
-claude plugin install /path/to/skill-bench-plugin
+claude plugin marketplace add https://github.com/Yiminnn/skill-bench-plugin
+claude plugin install skill-bench
 ```
 
 ### Prerequisites
