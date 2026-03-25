@@ -12,7 +12,7 @@ claude plugins add https://github.com/Yiminnn/skill-bench-plugin
 
 Best when you have source documents and know what the skill should do.
 
-### 1. Create
+### 1. Create — `/skill-bench-express`
 
 Type one message with what the skill should do and your source documents as URLs. Describe what each document is for — this controls how deeply each one is read.
 
@@ -54,31 +54,39 @@ These requirements should be the ground truth: [URL]
 | "separate reference", "for [topic]" | Targeted — only the named topic |
 | "background", "rationale", "context" | Structural — key concepts and definitions only |
 
-### 2. Review triage
+### 2. Review triage — automatic (part of `skill-bench-express`)
 
 Claude shows what it extracted from each document. Check that nothing important was missed. Type **y** or tell Claude what's wrong.
 
-### 3. Review draft
+### 3. Review draft — automatic (part of `skill-bench-express`)
 
 Claude generates the skill and asks you to review in your editor. Check that the workflow, citations, and terminology are correct. Type **looks good** or describe what to change.
 
-### 4. Test
+### 4. Test — `skill-tester` / `consistency-tester`
 
-Claude offers a sample run. Say **yes** for a quick check. For thorough testing, say **full validation** — Claude runs the skill 5 times per test case, shows what's consistent vs. variable, and you mark each run pass or fail. Claude proposes fixes for failures and re-runs until you're satisfied.
+Claude offers a sample run using the **`skill-tester`** agent. Say **yes** for a quick check.
 
-### 5. Finalize
+For thorough testing, say **full validation** — Claude spawns the **`consistency-tester`** agent, which runs the skill 5 times per test case, shows what's consistent vs. variable, and you mark each run pass or fail. The **`skill-refiner`** agent analyzes failure patterns and proposes fixes. Re-runs until you're satisfied.
+
+### 5. Finalize — automatic (part of `skill-bench-express`)
 
 Claude lints and promotes the skill to your chosen location.
 
 ## Path B: Full Workflow (From Scratch)
 
-Best for complex skills that benefit from design exploration and iterative development.
+Best for complex skills that benefit from design exploration and iterative development. Start with:
 
 ```
 /skill-bench
 ```
 
-Five phases: **Design** (brainstorm approaches) → **Plan** (generate implementation tasks) → **Build & Test** (execute with simulated + pressure testing) → **Validate** (multirun consistency testing) → **Finalize** (lint + promote).
+| Phase | Skill/Agent Used | What Happens |
+|-------|-----------------|--------------|
+| 1. Design | `superpowers:brainstorming` | Brainstorm approaches, produce design spec |
+| 2. Plan | `superpowers:writing-plans` | Generate implementation tasks |
+| 3. Build & Test | `superpowers:subagent-driven-development` | Execute tasks with `skill-tester` for behavioral testing |
+| 4. Validate | `consistency-tester` + `skill-refiner` | Multirun testing, user judgment, pattern-based refinement |
+| 5. Finalize | built-in | Lint + promote |
 
 Requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
