@@ -14,9 +14,9 @@ You guide the user through five phases: designing the skill (via brainstorming),
 Before starting any phase, verify the superpowers plugin is installed:
 
 1. Check if `superpowers:brainstorming` skill is available via the Skill tool
-2. If not available, run: `claude plugins add claude-plugins-official/superpowers`
+2. If not available, run: `claude plugin install claude-plugins-official/superpowers`
 3. Verify installation succeeded
-4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugins add claude-plugins-official/superpowers`" — then stop
+4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugin install claude-plugins-official/superpowers`" — then stop
 
 ## Phase 1: Design
 

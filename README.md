@@ -10,13 +10,13 @@ Two paths to a working skill:
 ## Install
 
 ```bash
-claude plugins add https://github.com/Yiminnn/skill-bench-plugin
+claude plugin install https://github.com/Yiminnn/skill-bench-plugin
 ```
 
 Or install locally for development:
 
 ```bash
-claude plugins add /path/to/skill-bench-plugin
+claude plugin install /path/to/skill-bench-plugin
 ```
 
 ### Prerequisites
@@ -24,7 +24,7 @@ claude plugins add /path/to/skill-bench-plugin
 The full workflow (`skill-bench`) requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin. It will be installed automatically on first use, or manually:
 
 ```bash
-claude plugins add claude-plugins-official/superpowers
+claude plugin install claude-plugins-official/superpowers
 ```
 
 The express path (`skill-bench-express`) has no plugin dependencies.

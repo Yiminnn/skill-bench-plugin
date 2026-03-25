@@ -217,9 +217,9 @@ You guide the user through four phases: designing the skill (via brainstorming),
 Before starting any phase, verify the superpowers plugin is installed:
 
 1. Check if `superpowers:brainstorming` skill is available via the Skill tool
-2. If not available, run: `claude plugins add claude-plugins-official/superpowers`
+2. If not available, run: `claude plugin install claude-plugins-official/superpowers`
 3. Verify installation succeeded
-4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugins add claude-plugins-official/superpowers`" — then stop
+4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugin install claude-plugins-official/superpowers`" — then stop
 
 ## Phase 1: Design
 
@@ -385,7 +385,7 @@ grep -c "skill-tester" skills/skill-bench/SKILL.md
 # Expected: 1+ each
 
 # Dependency check present
-grep -c "claude plugins add claude-plugins-official/superpowers" skills/skill-bench/SKILL.md
+grep -c "claude plugin install claude-plugins-official/superpowers" skills/skill-bench/SKILL.md
 # Expected: 2 (check + fallback message)
 
 # Flowchart review check present in Phase 4
@@ -476,7 +476,7 @@ A Claude Code plugin for interactive skill authoring. It provides a `skill-bench
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
-Install: `claude plugins add https://github.com/Yiminnn/skill-bench-plugin`
+Install: `claude plugin install https://github.com/Yiminnn/skill-bench-plugin`
 
 ## Development
 
@@ -577,19 +577,19 @@ A Claude Code plugin for interactive skill authoring. Create, test, and refine C
 Skill Bench requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin. It will be installed automatically on first use, or you can install it manually:
 
 ```bash
-claude plugins add claude-plugins-official/superpowers
+claude plugin install claude-plugins-official/superpowers
 ```
 
 ## Install
 
 ```bash
-claude plugins add https://github.com/Yiminnn/skill-bench-plugin
+claude plugin install https://github.com/Yiminnn/skill-bench-plugin
 ```
 
 Or install locally for development:
 
 ```bash
-claude plugins add /path/to/skill-bench-plugin
+claude plugin install /path/to/skill-bench-plugin
 ```
 
 ## What It Does

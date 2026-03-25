@@ -11,7 +11,7 @@
 At the start of every skill-bench invocation, before entering any phase:
 
 1. **Check for superpowers** — verify `superpowers:brainstorming` skill is available
-2. **Auto-install if missing** — run `claude plugins add claude-plugins-official/superpowers` and confirm success
+2. **Auto-install if missing** — run `claude plugin install claude-plugins-official/superpowers` and confirm success
 3. **Proceed** — once superpowers is confirmed, enter Phase 1
 
 No fallback path. If superpowers can't be installed (network issue, etc.), skill-bench stops and tells the user to install it manually. No "degraded mode."
