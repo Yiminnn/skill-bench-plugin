@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Claude Code plugin for interactive skill authoring. It provides a `skill-bench` skill (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
+A Claude Code plugin for interactive skill authoring. It provides two skill-creation paths — `skill-bench` (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) and `skill-bench-express` (fast path: Fetch → Triage → Generate → Present → Finalize) — plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
 
 **Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
 
@@ -19,11 +19,15 @@ No build, test, or lint commands — the entire codebase is markdown files and a
 ```
 .claude-plugin/plugin.json   # Plugin manifest — declares skills/ and agents/ dirs
 skills/skill-bench/
-  SKILL.md                   # Main skill: thin orchestrator invoking superpowers at phase boundaries
+  SKILL.md                   # Full workflow: thin orchestrator invoking superpowers at phase boundaries
   references/
-    skill-format.md          # Frontmatter schema + size budgets for SKILL.md files
-    anti-patterns.md         # Lint checklist used in Phase 4 (Finalize)
+    skill-format.md          # Frontmatter schema + size budgets (shared with express)
+    anti-patterns.md         # Lint checklist (shared with express)
     skill-authoring-plan-template.md  # Adapts writing-plans' task format for skill authoring
+skills/skill-bench-express/
+  SKILL.md                   # Express path: resource URLs + prompt → working skill
+  references/
+    role-extraction-guide.md # Role classification cues + extraction depth rules
 agents/
   consistency-tester.md      # Opus agent: multirun validation — runs skill-tester N times, compares, collects judgment
   skill-refiner.md           # Opus agent: dual-lens failure analysis, proposes targeted skill edits
@@ -33,7 +37,21 @@ agents/
 
 `plugin.json` points to `./skills/` and `./agents/` — the plugin loader discovers contents by convention.
 
-### Phase → Superpowers Mapping
+### Express Workflow (skill-bench-express)
+
+| Phase | What It Does |
+|-------|-------------|
+| 1. Parse | Extract skill description + classify resource URLs by role |
+| 2. Fetch | Download resources, extract at role-appropriate depth (full/citation-driven/targeted/structural) |
+| 3. Triage | Show extraction summary for user confirmation (skippable) |
+| 4. Generate | Produce SKILL.md + references + lightweight design spec |
+| 5. Present | Hard gate — user reviews draft in editor |
+| 6. Sample Run | Optional — single skill-tester invocation; can escalate to consistency-tester |
+| 7. Finalize | Lint (shared references) + promote |
+
+No superpowers dependency — uses standard Claude Code tools + shared agents.
+
+### Full Workflow Phase → Superpowers Mapping
 
 | Phase | Superpowers Skill | What It Does |
 |-------|-------------------|-------------|
