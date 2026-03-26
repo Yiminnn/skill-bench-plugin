@@ -25,3 +25,6 @@ npm-debug.log*
 # Drafts and local Claude config
 skills/drafts/
 CLAUDE.md
+
+# Historical docs (design specs, plans, quickstart) — removed from tracking
+docs/
