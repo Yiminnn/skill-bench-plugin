@@ -176,7 +176,7 @@ Written by skill-refiner after applying edits:
 ```json
 {
   "timestamp": "2026-03-25T14:30:00Z",
-  "skill_name": "fda-361",
+  "skill_name": "api-review",
   "runs_analyzed": 5,
   "findings": {
     "consistency": 2,

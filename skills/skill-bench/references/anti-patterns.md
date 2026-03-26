@@ -30,5 +30,5 @@ Use this checklist during Phase 5 (Finalize) to catch common issues before promo
 
 ## Eval Coverage
 
-- [ ] **No evals.json** — Skills built via the full workflow should have an `evals.json` in `.skillbench/evals/{skill-name}/` with assertions covering the skill's main behavioral capabilities. (Warning — not blocking for express-path skills.)
+- [ ] **No evals.json** — Skills should have an `evals.json` in `.skillbench/evals/{skill-name}/` with assertions covering the skill's main behavioral capabilities.
 - [ ] **Evals don't cover plan capabilities** — Cross-reference eval cases against the implementation plan's behavioral capabilities. Each major capability should have at least one eval case.

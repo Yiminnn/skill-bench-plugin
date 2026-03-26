@@ -290,7 +290,7 @@ After the "Structural Issues" section, add:
 ```markdown
 ## Eval Coverage
 
-- [ ] **No evals.json** — Skills built via the full workflow should have an `evals.json` in `.skillbench/evals/{skill-name}/` with assertions covering the skill's main behavioral capabilities. (Warning — not blocking for express-path skills.)
+- [ ] **No evals.json** — Skills should have an `evals.json` in `.skillbench/evals/{skill-name}/` with assertions covering the skill's main behavioral capabilities.
 - [ ] **Evals don't cover plan capabilities** — Cross-reference eval cases against the implementation plan's behavioral capabilities. Each major capability should have at least one eval case.
 ```
 
@@ -491,7 +491,7 @@ In the Phase 5 Lint Pass, after item 5 (Token efficiency) and before item 6 (Flo
 6. **Eval coverage:**
    - Verify `{evals_dir}/{skill-name}/evals.json` exists
    - Check that evals cover the skill's main behavioral capabilities from the plan
-   - Warning if missing (not blocking — express-path skills may not have evals)
+   - Warning if missing
 ```
 
 Then renumber the existing item 6 (Flowchart review) to item 7.
@@ -648,7 +648,7 @@ With:
 ```markdown
 ### Prerequisites
 
-The full workflow (`skill-bench`) requires:
+Requires:
 - [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (Phases 1-2)
 - [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) skill (Phase 3)
 
@@ -657,8 +657,6 @@ Both are installed automatically on first use, or manually:
 ```bash
 claude plugin install claude-plugins-official/superpowers
 ```
-
-The express path (`skill-bench-express`) has no dependencies.
 ```
 
 - [ ] **Step 2: Update full workflow phase descriptions**

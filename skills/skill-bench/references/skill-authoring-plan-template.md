@@ -133,9 +133,3 @@ Build and eval via skill-creator. Multirun validation via consistency-tester (Ph
 **Tech Stack:** Markdown (SKILL.md with YAML frontmatter), Claude Code plugin system
 ```
 
-## Concurrent Edit Protection
-
-Include this reminder in EVERY task that writes to draft files:
-
-> Before every Write or Edit: read file, compute SHA256, compare to last-known hash.
-> If different: show what changed, ask overwrite/incorporate/keep. Update hash after write.

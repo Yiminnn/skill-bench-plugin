@@ -192,7 +192,7 @@ Validate the skill and promote to its final location. Load `references/anti-patt
 6. **Eval coverage:**
    - Verify `{evals_dir}/{skill-name}/evals.json` exists
    - Check that evals cover the skill's main behavioral capabilities from the plan
-   - Warning if missing (not blocking — express-path skills may not have evals)
+   - Warning if missing
 
 7. **Flowchart review** (if skill contains `digraph` blocks):
    - Used only for non-obvious decision points, not linear instructions

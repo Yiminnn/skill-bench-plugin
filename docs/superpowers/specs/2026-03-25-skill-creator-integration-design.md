@@ -8,7 +8,7 @@ Integrate Anthropic's official `skill-creator` (from `anthropics/skills/skill-cr
 |----------|--------|
 | Skill-creator role | Primary build-and-test engine (Phase 3) |
 | Writing-skills role | Enriches plan template + lightweight summary as Phase 3 context |
-| Express path | Unchanged — no new dependencies |
+| Express path | N/A (removed) |
 | Consistency-tester (Phase 4) | Stays as separate sequential phase |
 | Description optimization | End of Phase 3, skill-creator's natural exit step |
 | Integration approach | Invoke installed skill-creator via Skill tool with structured handoff |
@@ -26,7 +26,7 @@ Skill-creator is a skill repo (`anthropics/skills/skill-creator/`), not a plugin
    - Scripts: `aggregate_benchmark`, `run_loop`, `generate_review.py`
 4. If install fails: tell user to install manually, provide instructions, stop
 
-Skill-creator is a Phase 3 dependency alongside superpowers. Express path remains dependency-free.
+Skill-creator is a Phase 3 dependency alongside superpowers.
 
 ## Section 2: Phase 3 Restructure — Skill-Creator Handoff
 
@@ -198,9 +198,8 @@ Updated lint checklist:
 
 | File | Why |
 |------|-----|
-| `skills/skill-bench-express/SKILL.md` | Express path unchanged. |
 | `agents/consistency-tester.md` | Phase 4 unchanged. |
 | `agents/skill-refiner.md` | Phase 4 unchanged. |
 | `agents/skill-tester.md` | Still used by consistency-tester. No longer used in Phase 3. |
 | `agents/skill-explorer.md` | Read-only scanner. |
-| `docs/quickstart.md` | Covers express primarily, full workflow description stays generic. |
+| `docs/quickstart.md` | Full workflow quick reference. |

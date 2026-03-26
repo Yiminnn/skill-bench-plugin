@@ -31,16 +31,16 @@ User creates `.skillbench/test-cases/{skill-name}.json` before Phase 4 begins:
   "run_count": 5,
   "cases": [
     {
-      "name": "standard-361-inspection",
-      "prompt": "Generate a 361 report for facility X based on the attached inspection data",
-      "reference_files": ["samples/361-example.pdf", "samples/inspection-data.csv"],
-      "description": "Standard 361 with all sections populated"
+      "name": "standard-code-review",
+      "prompt": "Review this pull request for security issues based on the attached diff",
+      "reference_files": ["samples/pr-example.diff", "samples/codebase-context.md"],
+      "description": "Standard review with all sections populated"
     },
     {
-      "name": "minimal-361-missing-fields",
-      "prompt": "Generate a 361 report with only the facility name and date available",
-      "reference_files": ["samples/minimal-input.txt"],
-      "description": "Tests graceful handling of missing data"
+      "name": "minimal-review-missing-context",
+      "prompt": "Review this pull request with only the diff and no codebase context",
+      "reference_files": ["samples/minimal-diff.txt"],
+      "description": "Tests graceful handling of missing context"
     }
   ]
 }
@@ -79,16 +79,16 @@ The consistency-tester agent executes runs:
 After all runs complete for a case, the agent produces a consistency report:
 
 ```
-## Case: standard-361-inspection (5 runs)
+## Case: standard-code-review (5 runs)
 
 ### Consistent Across Runs
-- All runs produced 7 sections in correct order
-- Date format: MM/DD/YYYY in all runs
-- Facility header block: identical in 5/5
+- All runs produced 5 sections in correct order
+- Severity ratings: consistent in all runs
+- Summary header block: identical in 5/5
 
 ### Variations
 - Section 3 (Findings): wording differs across runs, but structure consistent
-- Section 5 (Recommendations): run 2 included an extra sub-bullet not in others
+- Section 4 (Recommendations): run 2 included an extra sub-bullet not in others
 - Conclusion paragraph: 3 distinct phrasings observed
 
 ### Run Summaries
@@ -117,14 +117,14 @@ Storage: `.skillbench/test-history/{skill-name}/{case-name}-round-{r}-judgment.j
 
 ```json
 {
-  "case": "standard-361-inspection",
+  "case": "standard-code-review",
   "round": 1,
   "judgments": [
     { "run": 1, "status": "pass", "note": null },
-    { "run": 2, "status": "fail", "note": "extra sub-bullet in Section 5 shouldn't be there" },
+    { "run": 2, "status": "fail", "note": "extra sub-bullet in Section 4 shouldn't be there" },
     { "run": 3, "status": "pass", "note": null },
     { "run": 4, "status": "pass", "note": null },
-    { "run": 5, "status": "fail", "note": "conclusion too short, missing compliance statement" }
+    { "run": 5, "status": "fail", "note": "conclusion too short, missing summary statement" }
   ]
 }
 ```
@@ -144,14 +144,14 @@ After judgments for all cases, the agent synthesizes:
 ## Failure Pattern Analysis
 
 ### Pattern 1: Unconstrained optional content (3 failures across 2 cases)
-- standard-361: run 2 (extra sub-bullet), run 5 (missing compliance statement)
-- minimal-361: run 3 (invented data for missing fields)
+- standard-review: run 2 (extra sub-bullet), run 5 (missing summary statement)
+- minimal-review: run 3 (invented context for missing information)
 - Root cause: skill doesn't specify what to do when information is ambiguous —
   agent improvises differently each run
 
 ### Proposed Skill Edits
 1. Add explicit constraint: "Do not add content beyond what the input data supports"
-2. Add required section: "Compliance statement must appear in conclusion"
+2. Add required section: "Summary statement must appear in conclusion"
 3. Add missing-data rule: "For fields with no input data, write 'N/A — not provided'"
 ```
 
@@ -175,9 +175,9 @@ After edits are applied, the agent recommends which cases to re-run:
 ```
 ## Re-run Recommendation
 
-- standard-361-inspection: RE-RUN (2 failures linked to Pattern 1, now fixed)
-- minimal-361-missing-fields: RE-RUN (1 failure linked to Pattern 1)
-- edge-case-no-date: SKIP (all 5 passed)
+- standard-code-review: RE-RUN (2 failures linked to Pattern 1, now fixed)
+- minimal-review-missing-context: RE-RUN (1 failure linked to Pattern 1)
+- edge-case-empty-diff: SKIP (all 5 passed)
 
 Re-run all, just the recommended ones, or pick your own?
 ```
