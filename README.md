@@ -47,6 +47,15 @@ The consistency-tester agent runs the skill against real test cases multiple tim
 5. The skill-refiner agent analyzes failure patterns across runs and proposes targeted edits
 6. You approve edits, re-run, repeat until satisfied
 
+### Refine an existing skill
+
+```
+> /skill-bench
+> refine path/to/my-skill/SKILL.md
+```
+
+Imports the skill into the test bench, runs multirun consistency testing, and applies targeted refinements. Skips Design, Plan, and Build phases.
+
 ### Explore existing drafts
 
 ```

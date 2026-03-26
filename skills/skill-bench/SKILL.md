@@ -1,6 +1,6 @@
 ---
 name: skill-bench
-description: "Use when authoring new Claude Code skills or refining existing skill prompts. Guides a structured workflow: design via brainstorming, plan the skill structure, build with TDD pressure testing, validate with multirun consistency testing, and finalize."
+description: "Use when authoring new Claude Code skills or refining existing ones. New skills: 5-phase workflow (Design → Plan → Build → Validate → Finalize). Existing skills: enter at Refine Mode for validation and targeted refinement."
 ---
 
 # Skill Bench
@@ -8,6 +8,8 @@ description: "Use when authoring new Claude Code skills or refining existing ski
 Interactive workbench for creating, testing, and refining Claude Code skills through structured conversation.
 
 Five phases: Design (brainstorming) → Plan (writing-plans) → Build & Test (skill-creator) → Validate (consistency-tester) → Finalize (lint + promote).
+
+**Refining an existing skill?** → Jump to [Refine Mode](#refine-mode) — skips to validation and refinement.
 
 ## Dependency Check
 
@@ -158,6 +160,27 @@ Use the Agent tool to spawn the **consistency-tester** agent with:
 The consistency-tester handles the full validation loop: run collection → consistency summary → user judgment → failure analysis → skill refinement → re-run recommendations. It loops until the user declares validation complete.
 
 **Exit gate:** User declares validation complete.
+
+## Refine Mode
+
+Entry point for improving an existing skill. Skips Phases 1-3.
+
+### Import
+
+See `references/refine-mode.md` for the full import procedure.
+
+1. **Locate skill** — user provides path, skill name (from drafts), or installed skill path
+2. **Validate** — parse frontmatter, report identity and size
+3. **Copy to drafts** if source is a published skill (preserves original)
+4. **Setup workspace** — config, test-cases, test-history directories
+
+### Validate & Refine
+
+Execute **Phase 4** above using the imported skill's draft path. All Phase 4 mechanics apply: test case library, consistency-tester, user judgment loop, skill-refiner.
+
+### Finalize (Optional)
+
+Execute **Phase 5** below. If the skill was copied from a published location, promotion offers to overwrite the original or place at a new path.
 
 ## Phase 5: Finalize
 

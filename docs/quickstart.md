@@ -35,4 +35,5 @@ Requires the [superpowers](https://github.com/anthropics/claude-plugins-official
 | Mark a run as failed | "run 3 failed — [what went wrong]" |
 | Approve proposed fixes | "approve all" or "approve fix 1 and 3" |
 | Finish testing | "validation complete" |
+| Refine an existing skill | `/skill-bench` then "refine path/to/skill" |
 | Check existing drafts | "show me my skill drafts" |
