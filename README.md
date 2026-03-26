@@ -1,12 +1,6 @@
 # Skill Bench
 
-A Claude Code plugin for interactive skill authoring. Create, test, and refine Claude Code skills through conversation.
-
-```
-/skill-bench
-```
-
-Five phases: Design → Plan → Build & Test → Validate → Finalize.
+Interactive skill authoring for Claude Code — create, test, and refine skills through structured conversation.
 
 ## Install
 
@@ -15,68 +9,57 @@ claude plugin marketplace add https://github.com/Yiminnn/skill-bench-plugin
 claude plugin install skill-bench
 ```
 
-### Prerequisites
+## Quick Start
 
-Requires:
-- [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (Phases 1-2)
-- [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) skill (Phase 3)
-
-Both are installed automatically on first use, or manually:
-
-```bash
-claude plugin install claude-plugins-official/superpowers
+```
+/skill-bench
 ```
 
-## Usage
-
-The workflow:
-1. **Design** — Brainstorm approaches, produce a design spec via `superpowers:brainstorming`
-2. **Plan** — Generate implementation tasks with TDD steps via `superpowers:writing-plans`
-3. **Build & Test** — Build skill from plan, evaluate with baseline comparison, iterate via `skill-creator`
-4. **Validate** — Multirun consistency testing: run the skill N times, compare outputs, collect pass/fail judgments, refine based on failure patterns
-5. **Finalize** — Lint, validate references, promote to target location
-
-### Validate with multirun testing
-
-The consistency-tester agent runs the skill against real test cases multiple times:
-
-1. Define test cases in `.skillbench/test-cases/{skill-name}.json`
-2. The agent runs each case N times (default: 5) via the skill-tester
-3. A consistency summary shows what's stable vs. variable across runs
-4. You mark each run pass/fail with notes on what's wrong
-5. The skill-refiner agent analyzes failure patterns across runs and proposes targeted edits
-6. You approve edits, re-run, repeat until satisfied
+| Phase | What Happens | Powered By |
+|-------|-------------|------------|
+| 1. Design | Brainstorm approaches, produce design spec | `superpowers:brainstorming` |
+| 2. Plan | Generate implementation tasks with TDD steps | `superpowers:writing-plans` |
+| 3. Build & Test | Build skill, eval with baseline comparison, iterate | `skill-creator` |
+| 4. Validate | Multirun consistency testing, user judgment, refinement | `consistency-tester` + `skill-refiner` |
+| 5. Finalize | Lint, validate references, promote | built-in |
 
 ### Refine an existing skill
 
+Already have a skill? Skip straight to validation:
+
 ```
-> /skill-bench
+/skill-bench
 > refine path/to/my-skill/SKILL.md
 ```
 
-Imports the skill into the test bench, runs multirun consistency testing, and applies targeted refinements. Skips Design, Plan, and Build phases.
+### Quick Reference
 
-### Explore existing drafts
-
-```
-> Show me my skill drafts
-```
-
-The skill-explorer agent scans your drafts directory and reports status.
+| You want to... | Say... |
+|---|---|
+| Create a new skill | `/skill-bench` |
+| Refine an existing skill | `/skill-bench` then `refine path/to/skill` |
+| Approve a step | `y` or `looks good` |
+| Edit the draft yourself | Edit in your editor, then say `I edited it` |
+| Run quick test | `yes` (when offered sample run) |
+| Run thorough testing | `full validation` |
+| Mark a run as failed | `run 3 failed — [what went wrong]` |
+| Approve proposed fixes | `approve all` or `approve fix 1 and 3` |
+| Finish testing | `validation complete` |
+| Check existing drafts | `show me my skill drafts` |
 
 ## Components
 
 | Component | Type | Model | Purpose |
 |-----------|------|-------|---------|
-| `skill-bench` | Skill | — | 5-phase authoring workflow with superpowers + skill-creator orchestration |
-| `skill-tester` | Agent | Opus | Simulates skill execution, returns structured evaluation with thinking trace |
-| `consistency-tester` | Agent | Opus | Multirun validation: run collection, consistency analysis, user judgment, refinement loop |
-| `skill-refiner` | Agent | Opus | Dual-lens failure analysis (cross-run + per-run), proposes targeted skill edits |
+| `skill-bench` | Skill | — | 5-phase workflow orchestrator |
+| `skill-tester` | Agent | Opus | Simulates skill execution, returns structured eval with thinking trace |
+| `consistency-tester` | Agent | Opus | Multirun validation: run N times, compare, collect judgment, refine |
+| `skill-refiner` | Agent | Opus | Dual-lens failure analysis (cross-run + per-run), proposes targeted edits |
 | `skill-explorer` | Agent | Haiku | Read-only scanner for drafts and test history |
 
-## Project Config
+## Configuration
 
-On first use, Skill Bench creates `.skillbench/config.json` in your project:
+On first use, creates `.skillbench/config.json` in your project:
 
 ```json
 {
@@ -87,24 +70,30 @@ On first use, Skill Bench creates `.skillbench/config.json` in your project:
 }
 ```
 
-- `drafts_dir` — where draft skills are written (default: `skills/drafts`)
-- `evals_dir` — where eval definitions are stored (default: `.skillbench/evals`)
-- `test_model` — model for simulated testing (default: `claude-opus-4-6`)
-- `context_files` — glob patterns for files to include in test context
+### Artifacts
 
-### Artifact Locations
-
-| Directory | Purpose | Git Track? |
-|-----------|---------|------------|
+| Path | Purpose | Tracked? |
+|------|---------|----------|
 | `.skillbench/config.json` | Project settings | Yes |
-| `.skillbench/specs/` | Design specs (brainstormed or auto-generated) | Yes |
-| `.skillbench/plans/` | Implementation plans from Phase 2 | Yes |
-| `.skillbench/evals/` | Eval definitions from Phase 3 (skill-creator) | Yes |
-| `.skillbench/workspace/` | Skill-creator workspace (iterations, grading, benchmarks) | No (gitignore) |
-| `.skillbench/test-cases/` | Test case libraries for multirun validation | Yes |
-| `.skillbench/test-history/` | Test results, judgments, refinement records | No (gitignore) |
+| `.skillbench/specs/` | Design specs | Yes |
+| `.skillbench/plans/` | Implementation plans | Yes |
+| `.skillbench/evals/` | Eval definitions | Yes |
+| `.skillbench/test-cases/` | Test case libraries | Yes |
+| `.skillbench/workspace/` | Skill-creator iterations | No |
+| `.skillbench/test-history/` | Test results and refinements | No |
 
-The workflow will offer to update `.gitignore` on first use.
+## Prerequisites
+
+Requires two dependencies (both auto-installed on first use):
+
+- [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) — Phases 1-2 (brainstorming + planning)
+- [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) — Phase 3 (build + eval)
+
+Manual install if needed:
+
+```bash
+claude plugin install claude-plugins-official/superpowers
+```
 
 ## License
 
