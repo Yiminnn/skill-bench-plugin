@@ -21,3 +21,7 @@ npm-debug.log*
 
 # Skill Bench runtime artifacts
 .skillbench/test-history/
+
+# Drafts and local Claude config
+skills/drafts/
+CLAUDE.md
