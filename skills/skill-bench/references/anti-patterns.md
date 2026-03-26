@@ -1,6 +1,6 @@
 # Skill Anti-Patterns — Lint Checklist
 
-Use this checklist during Phase 4 (Finalize) to catch common issues before promoting a skill draft.
+Use this checklist during Phase 5 (Finalize) to catch common issues before promoting a skill draft.
 
 ## Frontmatter Issues
 
@@ -27,3 +27,8 @@ Use this checklist during Phase 4 (Finalize) to catch common issues before promo
 - [ ] **No overview section** — First section after the H1 title should orient the reader in 2-5 lines.
 - [ ] **No quality gates** — Skills that guide multi-step workflows should include verification checkpoints.
 - [ ] **Companion agent referenced but not created** — If the skill mentions spawning a specific agent, that agent's `.md` file must exist.
+
+## Eval Coverage
+
+- [ ] **No evals.json** — Skills built via the full workflow should have an `evals.json` in `.skillbench/evals/{skill-name}/` with assertions covering the skill's main behavioral capabilities. (Warning — not blocking for express-path skills.)
+- [ ] **Evals don't cover plan capabilities** — Cross-reference eval cases against the implementation plan's behavioral capabilities. Each major capability should have at least one eval case.

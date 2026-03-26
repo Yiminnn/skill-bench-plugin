@@ -7,16 +7,25 @@ description: "Use when authoring new Claude Code skills or refining existing ski
 
 Interactive workbench for creating, testing, and refining Claude Code skills through structured conversation.
 
-You guide the user through five phases: designing the skill (via brainstorming), planning the structure, building and testing with TDD (simulated execution + pressure testing), validating with multirun consistency testing, and finalizing. You invoke superpowers skills at phase boundaries and provide skill-authoring context.
+Five phases: Design (brainstorming) → Plan (writing-plans) → Build & Test (skill-creator) → Validate (consistency-tester) → Finalize (lint + promote).
 
 ## Dependency Check
 
-Before starting any phase, verify the superpowers plugin is installed:
+Before starting, verify required dependencies:
+
+### Superpowers (Phases 1-2)
 
 1. Check if `superpowers:brainstorming` skill is available via the Skill tool
 2. If not available, run: `claude plugin install claude-plugins-official/superpowers`
 3. Verify installation succeeded
-4. If installation fails, tell the user: "Skill Bench requires the superpowers plugin. Install manually: `claude plugin install claude-plugins-official/superpowers`" — then stop
+4. If fails: "Skill Bench requires the superpowers plugin. Install manually: `claude plugin install claude-plugins-official/superpowers`" — stop
+
+### Skill-Creator (Phase 3)
+
+1. Check if the `skill-creator` skill is available
+2. If not available: clone `skills/skill-creator/` from `https://github.com/anthropics/skills` to `~/.claude/skills/skill-creator/`
+3. Verify `~/.claude/skills/skill-creator/SKILL.md` and its internal agents are accessible
+4. If fails: "Phase 3 requires skill-creator. Install from https://github.com/anthropics/skills" — stop
 
 ## Phase 1: Design
 
@@ -61,48 +70,53 @@ Then invoke writing-plans. It handles: file structure mapping, bite-sized task c
    ```json
    {
      "drafts_dir": "skills/drafts",
+     "evals_dir": ".skillbench/evals",
      "test_model": "claude-opus-4-6",
      "context_files": []
    }
    ```
-   Read the config if it exists. Use `drafts_dir` as the base directory for new drafts.
+   Read the config if it exists. Use `drafts_dir` and `evals_dir` from config.
 
 2. **Update .gitignore** — If `.gitignore` exists and doesn't mention `.skillbench`, offer to add:
    ```
-   # Skill Bench test history
+   # Skill Bench artifacts
    .skillbench/test-history/
+   .skillbench/workspace/
    ```
 
-3. **Create the draft directory** — `{drafts_dir}/{skill-name}/`
+3. **Create directories:**
+   - Draft: `{drafts_dir}/{skill-name}/`
+   - Evals: `{evals_dir}/{skill-name}/`
+   - Workspace: `.skillbench/workspace/{skill-name}/`
 
 ### Execution
 
-**REQUIRED SUB-SKILL:** Use `superpowers:subagent-driven-development`
+**REQUIRED:** Invoke the `skill-creator` skill with structured handoff context.
 
-Provide these role adaptations for skill authoring:
+Before invoking:
 
-**Implementer:** Writes skill sections and reference files following the plan. Self-reviews against `references/skill-format.md`. Reports standard status (DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED).
+1. **Read design spec** from `.skillbench/specs/{skill-name}-design.md`. If missing, return to Phase 1.
+2. **Read implementation plan** from `.skillbench/plans/{skill-name}-plan.md`. If missing, return to Phase 2.
+3. **Read skill-authoring constraints** — summarize `references/skill-format.md` for skill-creator: frontmatter schema, size budgets, reference splitting rules.
+4. **Read writing-skills principles** — read `references/writing-skills-summary.md` and include as context.
+5. **Construct handoff** with override instructions:
+   - "Skip interview/intent capture — design spec and plan are already approved"
+   - "Build the skill following the implementation plan"
+   - "Write skill draft to `{drafts_dir}/{skill-name}/`"
+   - "Write evals to `{evals_dir}/{skill-name}/evals.json`"
+   - "Write workspace to `.skillbench/workspace/{skill-name}/`"
+   - "Run description optimization before exiting"
+   - "Return handoff summary: final skill path, eval results path, description optimization results"
 
-**Reviewer 1 — Spec Compliance:** Checks skill section against the design spec from Phase 1. Validates frontmatter, size budgets, and cross-references against `references/skill-format.md`.
-
-**Reviewer 2 — Behavioral Testing:** Replaces code quality review. Runs two tests:
-1. **Simulated execution** — spawns the **skill-tester** agent with current SKILL.md draft + sample input from the plan
-   (Use the Agent tool to spawn the skill-tester agent, which is registered by this plugin)
-2. **Pressure test** — spawns a fresh subagent WITH the skill loaded, gives it the baseline pressure scenario from the plan task
-
-Spec compliance must pass before behavioral testing. Both must pass before marking a task complete.
+Skill-creator runs its eval loop: write skill → create evals with assertions → run with-skill + without-skill → grade → launch eval viewer → iterate → optimize description → return handoff summary.
 
 ### Operational Rules
 
-**Size tracking:** After each task, report `{filename}: {lines} lines (~{lines * 6} tokens)`. At 200+ lines suggest splitting to `references/`. At 300+ lines strongly recommend splitting.
+**Size tracking:** After skill-creator exits, report `{filename}: {lines} lines (~{lines * 6} tokens)` for each file in the draft. At 200+ lines suggest splitting to `references/`. At 300+ lines strongly recommend.
 
-**Concurrent edit protection:** Before every Write or Edit to a draft file, read the file and compute SHA256. Compare to last-known hash. If different: show what changed, ask whether to overwrite, incorporate, or keep. Update hash after successful write.
+**Artifacts:** Skill-creator writes workspace artifacts to `.skillbench/workspace/{skill-name}/`. Eval definitions are preserved in `{evals_dir}/{skill-name}/evals.json`.
 
-**Test history:** Save to `.skillbench/test-history/{skill-name}/`:
-- `{timestamp}.json` — simulated test results (existing format)
-- `{timestamp}-pressure.json` — pressure test results
-
-**Exit gate:** All plan tasks complete. All reviews (spec compliance + behavioral testing) pass.
+**Exit gate:** Skill-creator returns handoff summary with final skill path and eval results.
 
 ## Phase 4: Validate
 
@@ -112,8 +126,11 @@ Spec compliance must pass before behavioral testing. Both must pass before marki
 
 1. **Check for test case library** — Look for `.skillbench/test-cases/{skill-name}.json`
    - If it exists, read it and confirm the cases with the user
-   - If it doesn't exist, prompt the user to create it:
-     > "Create your test case library at `.skillbench/test-cases/{skill-name}.json`. Format:"
+   - If it doesn't exist:
+     - If `{evals_dir}/{skill-name}/evals.json` exists (from Phase 3), offer to convert: "I can seed your test case library from the Phase 3 evals. Convert?"
+       - If yes: read `evals.json`, map each eval case to a test case (eval prompt → test prompt, eval assertions → test description), write to `.skillbench/test-cases/{skill-name}.json`
+     - Otherwise, prompt the user to create it:
+       > "Create your test case library at `.skillbench/test-cases/{skill-name}.json`. Format:"
      > ```json
      > {
      >   "run_count": 5,
@@ -163,16 +180,21 @@ Validate the skill and promote to its final location. Load `references/anti-patt
    - Scan for `skill: \`name\`` — Glob to verify each exists
    - Scan for `**name** agent` — Glob to verify each exists
 
-4. **Description quality (CSO):**
-   - Description is trigger-oriented, not workflow-summarizing
+4. **Description quality (CSO verification):**
+   - Verify description is trigger-oriented, not workflow-summarizing (optimized in Phase 3)
    - Glob existing `**/SKILL.md` files, check for description overlap
-   - Keywords present for discovery
+   - If skill changed during Phase 4, re-run description optimization via skill-creator
 
 5. **Token efficiency:**
    - Report word count (`wc -w`) and line count
    - Flag if SKILL.md exceeds 200 lines or SKILL.md + references exceeds 500 lines
 
-6. **Flowchart review** (if skill contains `digraph` blocks):
+6. **Eval coverage:**
+   - Verify `{evals_dir}/{skill-name}/evals.json` exists
+   - Check that evals cover the skill's main behavioral capabilities from the plan
+   - Warning if missing (not blocking — express-path skills may not have evals)
+
+7. **Flowchart review** (if skill contains `digraph` blocks):
    - Used only for non-obvious decision points, not linear instructions
    - Labels have semantic meaning (not "step1", "helper2")
    - No code in flowchart labels

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Claude Code plugin for interactive skill authoring. It provides two skill-creation paths — `skill-bench` (5-phase workflow: Design → Plan → Build & Test → Validate → Finalize) and `skill-bench-express` (fast path: Parse → Fetch → Triage → Generate → Present → Sample Run → Finalize) — plus four companion agents (`skill-tester`, `consistency-tester`, `skill-refiner`, `skill-explorer`).
 
-**Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (auto-installed on first use).
+**Requires:** [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin + [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) skill (both auto-installed on first use).
 
 Install: `claude plugin marketplace add https://github.com/Yiminnn/skill-bench-plugin && claude plugin install skill-bench`
 
@@ -24,6 +24,7 @@ skills/skill-bench/
     skill-format.md          # Frontmatter schema + size budgets (shared with express)
     anti-patterns.md         # Lint checklist (shared with express)
     skill-authoring-plan-template.md  # Adapts writing-plans' task format for skill authoring
+    writing-skills-summary.md   # Writing-skills principles distillation (Phase 3 context)
 skills/skill-bench-express/
   SKILL.md                   # Express path: resource URLs + prompt → working skill
   references/
@@ -57,21 +58,22 @@ No superpowers dependency — uses standard Claude Code tools + shared agents.
 |-------|-------------------|-------------|
 | 1. Design | `superpowers:brainstorming` | Collaborative design spec with 2-3 approaches |
 | 2. Plan | `superpowers:writing-plans` | Bite-sized tasks using skill-authoring template |
-| 3. Build & Test | `superpowers:subagent-driven-development` | Execute tasks with spec + behavioral review |
+| 3. Build & Test | `skill-creator` (from `anthropics/skills`) | Build skill from plan, eval with baseline comparison, grade, iterate, optimize description |
 | 4. Validate | (skill-bench native via consistency-tester) | Multirun testing, user judgment, pattern analysis, refinement |
 | 5. Finalize | (skill-bench native) | Lint, CSO check, promote |
 
-### Reviewer Roles in Phase 3
+### Skill-Creator in Phase 3
 
-- **Reviewer 1 (Spec Compliance):** Checks against design spec + `skill-format.md`
-- **Reviewer 2 (Behavioral Testing):** Spawns `skill-tester` for simulated execution + pressure tests from writing-skills TDD
+Phase 3 delegates to Anthropic's official `skill-creator` skill with structured handoff context (design spec, plan, skill-format constraints, writing-skills principles). Skill-creator handles: write → eval (with-skill + baseline) → grade → viewer → iterate → description optimization.
 
 ### Runtime Artifacts (created in user projects, not this repo)
 
-- `.skillbench/config.json` — project config (drafts_dir, test_model, context_files)
+- `.skillbench/config.json` — project config (drafts_dir, evals_dir, test_model, context_files)
 - `.skillbench/specs/{skill-name}-design.md` — design specs from Phase 1
 - `.skillbench/plans/{skill-name}-plan.md` — implementation plans from Phase 2
-- `.skillbench/test-history/{skill-name}/` — simulated + pressure test results
+- `.skillbench/evals/{skill-name}/evals.json` — eval definitions from Phase 3 (git-tracked)
+- `.skillbench/workspace/{skill-name}/` — skill-creator workspace: iterations, grading, benchmarks (gitignored)
+- `.skillbench/test-history/{skill-name}/` — consistency-tester results + refinement records (gitignored)
 - `.skillbench/test-cases/{skill-name}.json` — test case library for multirun validation
 - `skills/drafts/` — default location for in-progress skill drafts
 

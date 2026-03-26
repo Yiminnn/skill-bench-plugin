@@ -16,13 +16,17 @@ claude plugin install skill-bench
 
 ### Prerequisites
 
-The full workflow (`skill-bench`) requires the [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin. It will be installed automatically on first use, or manually:
+The full workflow (`skill-bench`) requires:
+- [superpowers](https://github.com/anthropics/claude-plugins-official/tree/main/superpowers) plugin (Phases 1-2)
+- [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) skill (Phase 3)
+
+Both are installed automatically on first use, or manually:
 
 ```bash
 claude plugin install claude-plugins-official/superpowers
 ```
 
-The express path (`skill-bench-express`) has no plugin dependencies.
+The express path (`skill-bench-express`) has no dependencies.
 
 ## Usage
 
@@ -65,7 +69,7 @@ Best for complex skills that benefit from design exploration and iterative TDD:
 The full workflow:
 1. **Design** — Brainstorm approaches, produce a design spec via `superpowers:brainstorming`
 2. **Plan** — Generate implementation tasks with TDD steps via `superpowers:writing-plans`
-3. **Build & Test** — Execute tasks with simulated + pressure testing via `superpowers:subagent-driven-development`
+3. **Build & Test** — Build skill from plan, evaluate with baseline comparison, iterate via `skill-creator`
 4. **Validate** — Multirun consistency testing: run the skill N times, compare outputs, collect pass/fail judgments, refine based on failure patterns
 5. **Finalize** — Lint, validate references, promote to target location
 
@@ -92,7 +96,7 @@ The skill-explorer agent scans your drafts directory and reports status.
 
 | Component | Type | Model | Purpose |
 |-----------|------|-------|---------|
-| `skill-bench` | Skill | — | Full 5-phase authoring workflow with superpowers orchestration |
+| `skill-bench` | Skill | — | Full 5-phase authoring workflow with superpowers + skill-creator orchestration |
 | `skill-bench-express` | Skill | — | Fast path: reference documents + prompt to working skill |
 | `skill-tester` | Agent | Opus | Simulates skill execution, returns structured evaluation with thinking trace |
 | `consistency-tester` | Agent | Opus | Multirun validation: run collection, consistency analysis, user judgment, refinement loop |
@@ -106,12 +110,14 @@ On first use, Skill Bench creates `.skillbench/config.json` in your project:
 ```json
 {
   "drafts_dir": "skills/drafts",
+  "evals_dir": ".skillbench/evals",
   "test_model": "claude-opus-4-6",
   "context_files": []
 }
 ```
 
 - `drafts_dir` — where draft skills are written (default: `skills/drafts`)
+- `evals_dir` — where eval definitions are stored (default: `.skillbench/evals`)
 - `test_model` — model for simulated testing (default: `claude-opus-4-6`)
 - `context_files` — glob patterns for files to include in test context
 
@@ -122,6 +128,8 @@ On first use, Skill Bench creates `.skillbench/config.json` in your project:
 | `.skillbench/config.json` | Project settings | Yes |
 | `.skillbench/specs/` | Design specs (brainstormed or auto-generated) | Yes |
 | `.skillbench/plans/` | Implementation plans from Phase 2 | Yes |
+| `.skillbench/evals/` | Eval definitions from Phase 3 (skill-creator) | Yes |
+| `.skillbench/workspace/` | Skill-creator workspace (iterations, grading, benchmarks) | No (gitignore) |
 | `.skillbench/test-cases/` | Test case libraries for multirun validation | Yes |
 | `.skillbench/test-history/` | Test results, judgments, refinement records | No (gitignore) |
 
@@ -135,7 +143,7 @@ Both paths share agents and references — no duplication:
 |------------------|-----------------|----------------------|
 | `skill-format.md` | Generate + Finalize | Phase 1, 3, 5 |
 | `anti-patterns.md` | Finalize | Phase 5 |
-| `skill-tester` agent | Sample Run | Phase 3 (behavioral testing) |
+| `skill-tester` agent | Sample Run | Phase 4 (via consistency-tester) |
 | `consistency-tester` agent | Escalation from Sample Run | Phase 4 |
 | `skill-refiner` agent | Via consistency-tester | Via consistency-tester |
 | `.skillbench/` artifacts | Config, specs, test history | All artifacts |

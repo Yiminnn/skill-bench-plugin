@@ -32,7 +32,11 @@ What rationalizations might it use to skip this behavior?
 - [ ] **Step 2: Write baseline pressure scenario**
 
 A prompt that tests this behavior WITHOUT the skill. Must:
-- Create realistic pressure (time, complexity, sunk cost)
+- Combine at least 2 pressure types for discipline-enforcing skills:
+  - **Time:** "the user is waiting", "this is urgent"
+  - **Sunk cost:** "you've already written most of the code"
+  - **Authority:** "the senior engineer said to skip this"
+  - **Exhaustion:** "this is task 7 of 12"
 - NOT mention the skill or its rules
 - Be specific enough to observe compliance/violation
 
@@ -44,7 +48,8 @@ Spawn subagent WITHOUT skill. Give it the pressure scenario. Document:
 
 Use the Agent tool to spawn a fresh subagent. Do NOT load the skill being tested — the point is to observe natural behavior without it.
 - What the agent did
-- Rationalizations used (verbatim)
+- Rationalizations used (**record exact verbatim quotes** — these become the rationalization table in the skill)
+- Which pressure types triggered which violations
 
 Expected: Agent violates or skips the target behavior.
 
@@ -68,6 +73,9 @@ Expected: Agent complies with skill instructions.
 - [ ] **Step 7: Iterate if needed**
 
 If Step 5 or 6 failed: identify gap, edit skill section, re-run failing test.
+- For each new rationalization discovered, add an explicit counter to the skill
+- If 3+ rationalizations target the same rule, build a red flags list
+- Close loopholes explicitly — don't just restate the rule, forbid specific workarounds
 
 - [ ] **Step 8: Commit**
 ```
@@ -83,6 +91,19 @@ Break skills into tasks by **behavioral capability**, not by markdown heading:
 5. Companion agent (if the skill spawns agents)
 
 Not every skill needs all 5. Simple skills may only need 1-2.
+
+## Skill Type Testing Strategies
+
+Different skill types need different pressure scenarios and test approaches:
+
+| Skill Type | Examples | Test With | Success Criteria |
+|-----------|----------|-----------|-----------------|
+| **Discipline** | TDD, verification gates | Pressure scenarios with combined pressures + rationalization tables | Agent follows rule under maximum pressure |
+| **Technique** | Step-by-step guides, workflows | Application + variation + missing info scenarios | Agent applies technique correctly to new scenarios |
+| **Pattern** | Mental models, design patterns | Recognition + application + counter-example scenarios | Agent identifies when/how to apply (and when NOT to) |
+| **Reference** | API docs, format specs | Retrieval + application + gap scenarios | Agent finds and correctly uses reference info |
+
+When writing plan tasks, match pressure scenario design to the skill type. Discipline skills need heavy rationalization testing. Reference skills need retrieval accuracy testing.
 
 ## Size Budget Checkpoints
 
@@ -100,14 +121,14 @@ Use this header for skill-authoring plans:
 ```
 # [Skill Name] Skill Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
-> to implement this plan. Reviewer 2 runs behavioral testing (simulated execution +
-> pressure tests) instead of code quality review.
+> **For agentic workers:** This plan is executed by the `skill-creator` skill
+> during Phase 3 of skill-bench. Skill-creator handles the eval loop:
+> write → test (with/without baseline) → grade → viewer → iterate → optimize description.
 
 **Goal:** Create the {skill-name} skill that [one sentence]
 
 **Architecture:** Skill-bench orchestrated. SKILL.md + references/ for heavy content.
-Testing via skill-tester agent (simulated) and pressure testing (writing-skills TDD).
+Build and eval via skill-creator. Multirun validation via consistency-tester (Phase 4).
 
 **Tech Stack:** Markdown (SKILL.md with YAML frontmatter), Claude Code plugin system
 ```

@@ -85,7 +85,7 @@ Best for complex skills that benefit from design exploration and iterative devel
 |-------|-----------------|--------------|
 | 1. Design | `superpowers:brainstorming` | Brainstorm approaches, produce design spec |
 | 2. Plan | `superpowers:writing-plans` | Generate implementation tasks |
-| 3. Build & Test | `superpowers:subagent-driven-development` | Execute tasks with `skill-tester` for behavioral testing |
+| 3. Build & Test | `skill-creator` | Build skill from plan, eval with baseline comparison, iterate |
 | 4. Validate | `consistency-tester` + `skill-refiner` | Multirun testing, user judgment, pattern-based refinement |
 | 5. Finalize | built-in | Lint + promote |
 
